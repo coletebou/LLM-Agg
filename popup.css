@@ -105,9 +105,10 @@ button {
 .result pre { /* Code blocks */
   background-color: #f4f4f4;
   padding: 5px;
-  overflow-x: auto; /* Keep scroll for extremely wide code if needed */
-  white-space: pre-wrap; /* Wrap lines to avoid forcing a horizontal scrollbar */
-  word-break: break-all; /* Break long tokens so they don't overflow */
+  overflow-x: hidden; /* Hide horizontal scrollbar entirely */
+  white-space: pre-wrap; /* Wrap lines so code never forces the popup wider */
+  word-break: break-all; /* Break long tokens to avoid overflow */
+  max-width: 100%; /* Constrain pre blocks within their container */
   font-size: 12px; /* Slightly smaller text to fit more code */
 }
 
