@@ -1,6 +1,7 @@
-/* We no longer need overflow-x: hidden on html. Let the JS handle the final width. */
+/* Prevent stray horizontal scrollbars on the root element */
 html {
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 *, *:before, *:after {
   box-sizing: inherit;

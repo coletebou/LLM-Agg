@@ -38,22 +38,19 @@ function updatePopupWidth() {
   const cssMinWidth = 300;
 
   requestAnimationFrame(() => {
-    // To accurately measure the required width, we temporarily allow the body
-    // to size itself to its content's maximum width.
-    const originalBodyWidth = document.body.style.width;
+    // Temporarily let the body expand to its natural width.
+    const originalWidth = document.body.style.width;
     document.body.style.width = 'max-content';
 
-    // Measure the resulting scrollWidth.
-    let newWidth = document.body.scrollWidth;
+    const scrollWidth = document.body.scrollWidth;
+    const scrollbarWidth = document.body.offsetWidth - document.body.clientWidth;
 
-    // Immediately restore the original body width style to prevent flicker or layout shifts.
-    document.body.style.width = originalBodyWidth;
+    document.body.style.width = originalWidth;
 
-    // Apply constraints.
+    let newWidth = Math.ceil(scrollWidth + scrollbarWidth);
     newWidth = Math.min(newWidth, cssMaxWidth);
     newWidth = Math.max(newWidth, cssMinWidth);
 
-    // Set the final, calculated width on both html and body.
     document.documentElement.style.width = newWidth + 'px';
     document.body.style.width = newWidth + 'px';
   });
