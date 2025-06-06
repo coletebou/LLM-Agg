@@ -11,7 +11,9 @@ This folder holds a lightweight Chrome extension that queries multiple language 
    export const GROK_API_KEY = '...';
    export const GEMINI_API_KEY = '...';
    ```
-   Keep this file local and never commit real keys.
+   Keep this file local and never commit real keys. The extension falls back to
+   placeholder keys if the file is missing, allowing the UI to load even without
+   real credentials.
 2. Edit `settings.json` with your preferred model names.
 3. Optionally adjust token prices in `pricing.json` (values are dollars per **million** tokens).
 4. In Chrome, open `chrome://extensions` and enable **Developer mode**.

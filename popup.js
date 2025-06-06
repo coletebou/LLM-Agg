@@ -1,5 +1,18 @@
-// Import API keys from secrets.js
-import { OPENAI_API_KEY, GROK_API_KEY, GEMINI_API_KEY } from './secrets.js';
+// API keys will be loaded from an optional secrets.js file
+let OPENAI_API_KEY = 'API-KEY-HERE';
+let GROK_API_KEY = 'API-KEY-HERE';
+let GEMINI_API_KEY = 'API-KEY-HERE';
+
+async function loadSecrets() {
+  try {
+    const secrets = await import(chrome.runtime.getURL('secrets.js'));
+    OPENAI_API_KEY = secrets.OPENAI_API_KEY;
+    GROK_API_KEY = secrets.GROK_API_KEY;
+    GEMINI_API_KEY = secrets.GEMINI_API_KEY;
+  } catch (e) {
+    console.warn('secrets.js not found, using placeholder API keys');
+  }
+}
 
 const mdWorker = new Worker(chrome.runtime.getURL('markdownWorker.js'));
 function parseMarkdown(md) {
@@ -516,6 +529,7 @@ async function askAll(question) {
 }
 
 async function init() {
+  await loadSecrets();
   await loadSettings(); // Load non-sensitive settings first
   await loadPricing();
   await loadToggles();
