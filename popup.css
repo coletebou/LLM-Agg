@@ -90,6 +90,10 @@ button {
   align-items: center;
 }
 
+#cancel-loading {
+  margin-left: 10px;
+}
+
 #spinner {
   width: 16px;
   height: 16px;

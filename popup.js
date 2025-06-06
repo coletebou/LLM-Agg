@@ -31,6 +31,7 @@ let pricing = null;
 let threads = [];
 let currentThreadId = null;
 let providerToggles = { openai: true, grok: true, gemini: true };
+let currentAbortController = null;
 
 // Function to update the popup width dynamically
 function updatePopupWidth() {
@@ -273,7 +274,7 @@ function getUnitCost(provider, model) {
   return { input, output };
 }
 
-async function askChatGPT(messages) {
+async function askChatGPT(messages, signal) {
   if (!OPENAI_API_KEY || OPENAI_API_KEY === "API-KEY-HERE") {
     return { text: "OpenAI API Key not configured in secrets.js" };
   }
@@ -287,10 +288,11 @@ async function askChatGPT(messages) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`, 
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal
     });
     if (!res.ok) {
       const errorData = await res.text(); 
@@ -304,11 +306,12 @@ async function askChatGPT(messages) {
       duration
     };
   } catch (err) {
+    if (err.name === 'AbortError') return { canceled: true };
     return { text: `ChatGPT error: ${err}` };
   }
 }
 
-async function askGrok(messages) {
+async function askGrok(messages, signal) {
   if (!GROK_API_KEY || GROK_API_KEY === "API-KEY-HERE") {
     return { text: "Grok API Key not configured in secrets.js" };
   }
@@ -322,10 +325,11 @@ async function askGrok(messages) {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROK_API_KEY}`, 
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal
     });
     if (!res.ok) {
       const errorData = await res.text();
@@ -339,11 +343,12 @@ async function askGrok(messages) {
       duration
     };
   } catch (err) {
+    if (err.name === 'AbortError') return { canceled: true };
     return { text: `Grok error: ${err}` };
   }
 }
 
-async function askGemini(messages) {
+async function askGemini(messages, signal) {
   if (!GEMINI_API_KEY || GEMINI_API_KEY === "API-KEY-HERE") {
     return { text: "Gemini API Key not configured in secrets.js" };
   }
@@ -360,7 +365,8 @@ async function askGemini(messages) {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal
     });
     if (!res.ok) {
       const errorData = await res.text();
@@ -375,6 +381,7 @@ async function askGemini(messages) {
       duration
     };
   } catch (err) {
+    if (err.name === 'AbortError') return { canceled: true };
     return { text: `Gemini error: ${err}` };
   }
 }
@@ -460,9 +467,22 @@ async function showResult(container, label, result, modelName, provider) {
 }
 
 async function askAll(question) {
-  const resultsEl = document.getElementById('results'); 
-  const loadingEl = document.getElementById('loading'); 
+  const resultsEl = document.getElementById('results');
+  const loadingEl = document.getElementById('loading');
   const textEl = document.getElementById('loading-text');
+  const cancelBtn = document.getElementById('cancel-loading');
+  currentAbortController = new AbortController();
+  const signal = currentAbortController.signal;
+  let canceled = false;
+  if (cancelBtn) {
+    cancelBtn.style.display = 'inline-block';
+    cancelBtn.onclick = () => {
+      if (!signal.aborted) currentAbortController.abort();
+      canceled = true;
+      loadingEl.style.display = 'none';
+      cancelBtn.style.display = 'none';
+    };
+  }
   const activeProviders = ['openai', 'grok', 'gemini'].filter(
     (p) => providerToggles[p]
   );
@@ -471,6 +491,7 @@ async function askAll(question) {
   loadingEl.style.display = 'flex';
   textEl.textContent = `Loading: ${completed} of ${total}`;
   const updateLoading = () => {
+    if (canceled) return;
     completed++;
     textEl.textContent = `Loading: ${completed} of ${total}`;
   };
@@ -505,15 +526,16 @@ async function askAll(question) {
         let res;
         if (cached) {
           res = cached;
-          await showResult(group, 'ChatGPT', res, settings?.openai_model || 'gpt-3.5-turbo', 'openai');
         } else {
-          res = await askChatGPT(currentOpenAIMessages);
+          res = await askChatGPT(currentOpenAIMessages, signal);
+        }
+        if (!res?.canceled) {
           await showResult(group, 'ChatGPT', res, settings?.openai_model || 'gpt-3.5-turbo', 'openai');
-          if (!res.text.includes("API Key not configured")) { 
+          if (!cached && !res.text.includes("API Key not configured")) {
             setCachedResponse('openai', currentOpenAIMessages, res);
           }
+          thread.openaiMessages.push({ role: 'assistant', content: res.text });
         }
-        thread.openaiMessages.push({ role: 'assistant', content: res.text });
         updateLoading();
         return res;
       })
@@ -525,15 +547,16 @@ async function askAll(question) {
         let res;
         if (cached) {
           res = cached;
-          await showResult(group, 'Grok', res, settings?.grok_model || 'grok-1', 'grok');
         } else {
-          res = await askGrok(currentGrokMessages);
+          res = await askGrok(currentGrokMessages, signal);
+        }
+        if (!res?.canceled) {
           await showResult(group, 'Grok', res, settings?.grok_model || 'grok-1', 'grok');
-          if (!res.text.includes("API Key not configured")) {
+          if (!cached && !res.text.includes("API Key not configured")) {
              setCachedResponse('grok', currentGrokMessages, res);
           }
+          thread.grokMessages.push({ role: 'assistant', content: res.text });
         }
-        thread.grokMessages.push({ role: 'assistant', content: res.text });
         updateLoading();
         return res;
       })
@@ -545,15 +568,16 @@ async function askAll(question) {
         let res;
         if (cached) {
           res = cached;
-          await showResult(group, 'Gemini', res, settings?.gemini_model || 'gemini-pro', 'gemini');
         } else {
-          res = await askGemini(currentGeminiMessages);
-          await showResult(group, 'Gemini', res, settings?.gemini_model || 'gemini-pro', 'gemini');
-           if (!res.text.includes("API Key not configured")) {
-            setCachedResponse('gemini', currentGeminiMessages, res);
-           }
+          res = await askGemini(currentGeminiMessages, signal);
         }
-        thread.geminiMessages.push({ role: 'assistant', content: res.text });
+        if (!res?.canceled) {
+          await showResult(group, 'Gemini', res, settings?.gemini_model || 'gemini-pro', 'gemini');
+          if (!cached && !res.text.includes("API Key not configured")) {
+            setCachedResponse('gemini', currentGeminiMessages, res);
+          }
+          thread.geminiMessages.push({ role: 'assistant', content: res.text });
+        }
         updateLoading();
         return res;
       })
@@ -568,11 +592,14 @@ async function askAll(question) {
 
   Promise.allSettled(tasks).then(() => {
     loadingEl.style.display = 'none';
-    const finalThread = threads.find((t) => t.id === currentThreadId); 
-    if (finalThread) {
-      finalThread.html = resultsEl.innerHTML; 
-      saveHistory();
-      renderHistory();
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    if (!canceled) {
+      const finalThread = threads.find((t) => t.id === currentThreadId);
+      if (finalThread) {
+        finalThread.html = resultsEl.innerHTML;
+        saveHistory();
+        renderHistory();
+      }
     }
     updatePopupWidth();
   });
