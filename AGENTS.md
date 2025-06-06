@@ -3,7 +3,6 @@
 ## Repository Layout
 - `LLM-Agg/` – Chrome extension that aggregates responses from multiple
   LLM providers. This is the primary directory for development.
-- Other folders – Assorted prototypes and tests. Ignore them unless requested.
 
 ## LLM-Agg-Extension Overview
 The extension queries OpenAI, xAI (Grok), and Google Gemini APIs and displays
@@ -15,7 +14,7 @@ their answers side by side. Key files:
 - `popup.css` – Styles for the popup.
 - `popup.js` – Handles requests, manages history, and renders results.
 - `markdownWorker.js` – Web worker used to sanitize and render Markdown safely.
-- `settings.json` – Contains API keys and default model names. **Never commit real credentials.**
+- `settings.json` – Contains placeholder API keys and default model names. **Never commit real credentials.**
 - `pricing.json` – Optional pricing data to estimate token cost per provider.
 - `README.md` – Setup and usage instructions with available models.
 
