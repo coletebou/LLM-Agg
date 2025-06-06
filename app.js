@@ -5,7 +5,7 @@ let GEMINI_API_KEY = 'API-KEY-HERE';
 
 async function loadSecrets() {
   try {
-    const secrets = await import(chrome.runtime.getURL('secrets.js'));
+    const secrets = await import('./secrets.js');
     OPENAI_API_KEY = secrets.OPENAI_API_KEY;
     GROK_API_KEY = secrets.GROK_API_KEY;
     GEMINI_API_KEY = secrets.GEMINI_API_KEY;
@@ -14,7 +14,7 @@ async function loadSecrets() {
   }
 }
 
-const mdWorker = new Worker(chrome.runtime.getURL('markdownWorker.js'));
+const mdWorker = new Worker('markdownWorker.js');
 function parseMarkdown(md) {
   return new Promise((resolve) => {
     const handler = (e) => {
@@ -59,52 +59,39 @@ function updatePopupWidth() {
 
 // Loads non-sensitive settings like model names from settings.json
 async function loadSettings() {
-  return new Promise(async (resolve) => {
-    try {
-      const res = await fetch(chrome.runtime.getURL('settings.json'));
-      settings = await res.json();
-      // We don't store API keys here anymore, just model preferences etc.
-      chrome.storage.local.set({ nonSensitiveSettings: settings }, resolve);
-    } catch (e) {
-      chrome.storage.local.get('nonSensitiveSettings', (data) => {
-        settings = data.nonSensitiveSettings || {}; // Default to empty if not found
-        resolve();
-      });
-    }
-  });
+  try {
+    const res = await fetch('settings.json');
+    settings = await res.json();
+    localStorage.setItem('nonSensitiveSettings', JSON.stringify(settings));
+  } catch (e) {
+    const saved = localStorage.getItem('nonSensitiveSettings');
+    settings = saved ? JSON.parse(saved) : {};
+  }
 }
 
 async function loadPricing() {
-  return new Promise(async (resolve) => {
-    try {
-      const res = await fetch(chrome.runtime.getURL('pricing.json'));
-      pricing = await res.json();
-      chrome.storage.local.set({ pricing }, resolve);
-    } catch (e) {
-      chrome.storage.local.get('pricing', (data) => {
-        pricing = data.pricing || null;
-        resolve();
-      });
-    }
-  });
+  try {
+    const res = await fetch('pricing.json');
+    pricing = await res.json();
+    localStorage.setItem('pricing', JSON.stringify(pricing));
+  } catch (e) {
+    const saved = localStorage.getItem('pricing');
+    pricing = saved ? JSON.parse(saved) : null;
+  }
 }
 
 async function loadToggles() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get('providerToggles', (data) => {
-      providerToggles = {
-        openai: true,
-        grok: true,
-        gemini: true,
-        ...(data.providerToggles || {})
-      };
-      resolve();
-    });
-  });
+  const saved = localStorage.getItem('providerToggles');
+  providerToggles = {
+    openai: true,
+    grok: true,
+    gemini: true,
+    ...(saved ? JSON.parse(saved) : {})
+  };
 }
 
 function saveToggles() {
-  chrome.storage.local.set({ providerToggles });
+  localStorage.setItem('providerToggles', JSON.stringify(providerToggles));
 }
 
 async function hashMessages(provider, messages) {
@@ -118,45 +105,42 @@ async function hashMessages(provider, messages) {
 
 async function getCachedResponse(provider, messages) {
   const key = 'cache_' + (await hashMessages(provider, messages));
-  return new Promise((resolve) => {
-    chrome.storage.local.get(key, (data) => {
-      resolve(data[key]);
-    });
-  });
+  const stored = localStorage.getItem(key);
+  return stored ? JSON.parse(stored) : null;
 }
 
 function setCachedResponse(provider, messages, result) {
   hashMessages(provider, messages).then((hash) => {
     const key = 'cache_' + hash;
-    const entry = {};
-    entry[key] = result;
-    chrome.storage.local.set(entry);
+    localStorage.setItem(key, JSON.stringify(result));
   });
 }
 
 
 function loadHistory() {
-  chrome.storage.local.get(['threads', 'currentThreadId'], (data) => {
-    threads = (data.threads || []).map((t) => ({
-      ...t,
-      openaiMessages: t.openaiMessages || [],
-      grokMessages: t.grokMessages || [],
-      geminiMessages: t.geminiMessages || []
-    }));
-    currentThreadId = data.currentThreadId || null;
-    renderHistory();
-    if (currentThreadId) {
-      const t = threads.find((th) => th.id === currentThreadId);
-      if (t) {
-        document.getElementById('results').innerHTML = t.html;
-      }
+  const storedThreads = localStorage.getItem('threads');
+  threads = storedThreads ? JSON.parse(storedThreads) : [];
+  threads = threads.map((t) => ({
+    ...t,
+    openaiMessages: t.openaiMessages || [],
+    grokMessages: t.grokMessages || [],
+    geminiMessages: t.geminiMessages || []
+  }));
+  const storedId = localStorage.getItem('currentThreadId');
+  currentThreadId = storedId ? JSON.parse(storedId) : null;
+  renderHistory();
+  if (currentThreadId) {
+    const t = threads.find((th) => th.id === currentThreadId);
+    if (t) {
+      document.getElementById('results').innerHTML = t.html;
     }
-    updatePopupWidth();
-  });
+  }
+  updatePopupWidth();
 }
 
 function saveHistory() {
-  chrome.storage.local.set({ threads, currentThreadId });
+  localStorage.setItem('threads', JSON.stringify(threads));
+  localStorage.setItem('currentThreadId', JSON.stringify(currentThreadId));
 }
 
 function ensureThread(question) {

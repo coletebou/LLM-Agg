@@ -1,9 +1,9 @@
-# LLM Aggregator Chrome Extension
+# LLM Aggregator Website
 
-This folder holds a lightweight Chrome extension that queries multiple language model providers and shows their answers side by side. It relies only on standard HTML, CSS and JavaScript.
+This project contains a lightweight website that queries multiple language model providers and displays their answers side by side. It relies only on standard HTML, CSS and JavaScript.
 
 ## Setup
-1. Create a `secrets.js` file containing your API keys.
+1. Optionally create a `secrets.js` file containing your API keys.
    It should export constants `OPENAI_API_KEY`, `GROK_API_KEY` and `GEMINI_API_KEY`.
    Example:
    ```js
@@ -11,31 +11,23 @@ This folder holds a lightweight Chrome extension that queries multiple language 
    export const GROK_API_KEY = '...';
    export const GEMINI_API_KEY = '...';
    ```
-   Keep this file local and never commit real keys. The extension falls back to
-   placeholder keys if the file is missing, allowing the UI to load even without
-   real credentials.
+   Keep this file local and never commit real keys. If the file is missing, the interface uses placeholder keys so the page still loads.
 2. Edit `settings.json` with your preferred model names.
 3. Optionally adjust token prices in `pricing.json` (values are dollars per **million** tokens).
-4. In Chrome, open `chrome://extensions` and enable **Developer mode**.
-5. Click **Load unpacked** and choose this `LLM-Agg-Extension` folder.
-6. The extension fetches the most recent pull request from GitHub to display
-   its title and timestamp. The manifest already grants access to
-   `https://api.github.com/*` for this purpose.
+4. Open `index.html` in your browser.
 
 ## Project Files
-- `manifest.json` – Declares extension permissions and registers the background script.
-- `index.html` – Full-page interface opened in a new tab.
-- `popup.html` – (legacy) the original popup HTML.
-- `popup.css` – Shared styles for both the popup and page.
-- `popup.js` – Fetches answers from each provider and maintains conversation history.
+- `index.html` – Main web page.
+- `style.css` – Styles for the interface.
+- `app.js` – Fetches answers from each provider and maintains conversation history.
 - `markdownWorker.js` – Web worker that sanitizes and renders Markdown.
 - `secrets.js` – **Untracked file** where you place your API keys.
 - `settings.json` – Preferred model names. This file contains no secrets.
 - `pricing.json` – Token price data used to estimate request cost.
 
 ## Usage
-Click the extension icon and a new tab opens with the LLM Aggregator page. Enter a question and press **Ask** to query OpenAI, Grok and Gemini side by side. A summary line shows which model responded, token counts and the estimated cost. Follow-up prompts keep a conversation going by resending the previous messages. A **Cancel** button appears while answers are loading so you can stop the requests if needed.
-The page also shows the title and timestamp of the most recent pull request to this repository so you can confirm you're running the latest code.
+Open the page and enter a question to query OpenAI, Grok and Gemini side by side. A summary line shows which model responded, token counts and the estimated cost. Follow-up prompts keep a conversation going by resending the previous messages. A **Cancel** button appears while answers are loading so you can stop the requests if needed.
+The page also shows the title and timestamp of the most recent pull request to this repository so you can confirm you are running the latest code.
 
 ## Available Models
 
@@ -105,5 +97,4 @@ aqa
 ## Contributing
 
 Development guidelines are in [AGENTS.md](AGENTS.md). Keep real API keys out of
-version control and update `pricing.json` or `manifest.json` when adding new
-providers or models.
+version control and update `pricing.json` when adding new providers or models.
