@@ -2,6 +2,8 @@
 html {
   box-sizing: border-box;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 }
 *, *:before, *:after {
   box-sizing: inherit;
@@ -9,66 +11,85 @@ html {
 
 body {
   font-family: Arial, sans-serif;
-  padding: 10px;
+  padding: 20px;          /* Increased padding around borders */
   min-width: 300px;
   max-width: 800px;
   overflow-y: auto;
-  overflow-x: hidden; /* This is our main guard against horizontal scrollbars appearing */
-  scrollbar-width: none; /* Hide scrollbar in Firefox */
+  overflow-x: hidden;     /* Main guard against horizontal scrollbars */
+  margin: 0;
+  width: 100%;            /* Ensure body does not exceed viewport width */
 }
 
-/* Hide scrollbar in Chromium based browsers */
+/* Hide scrollbar in Firefox */
+body {
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar in Chromium-based browsers */
 body::-webkit-scrollbar {
   display: none;
 }
+
 h1 {
   font-size: 18px;
 }
+
 #provider-toggles {
   margin-bottom: 5px;
 }
+
 #provider-toggles label {
   margin-right: 8px;
 }
 
 /* Styles for the form containing the textarea */
 #question-form {
-  display: block; 
-  width: 100%;   
-  overflow: visible; /* Let the textarea be its natural size without being clipped by the form */
-  margin: 0 0 5px 0; 
-  padding: 0; 
+  display: block;
+  width: 100%;
+  overflow: visible;      /* Let the textarea be its natural size without clipping */
+  margin: 0 0 5px 0;
+  padding: 0;
 }
 
 /* Styles for the textarea input field */
 textarea#question {
-  display: block; 
-  width: 100%;    
-  max-width: 100%; 
+  display: block;
+  width: 100%;
+  max-width: 100%;
   min-height: 60px;
-  padding: 5px;
+  padding: 8px;          /* Slightly increased padding inside textarea */
   border: 1px solid #ccc;
   margin: 0;
   resize: none;
-  overflow-y: auto;   
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
 button {
   margin-top: 5px;
 }
+
 #ask { 
-    margin-top: 5px; /* Re-add margin to the button itself */
+  margin-top: 5px;       /* Re-add margin to the button itself */
 }
 
-#clear-history {
+#new-chat, #toggle-history, #clear-history {
   margin-top: 5px;
+  display: inline-block;
 }
+
+#history {
+  margin-top: 10px;
+  border-top: 1px solid #ccc;
+  overflow-x: hidden;    /* Prevent horizontal overflow */
+}
+
 #loading {
   margin-top: 5px;
   display: flex;
   align-items: center;
 }
+
 #spinner {
   width: 16px;
   height: 16px;
@@ -78,6 +99,7 @@ button {
   animation: spin 1s linear infinite;
   margin-right: 5px;
 }
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -86,12 +108,12 @@ button {
 /* Styles for each result block */
 .result {
   margin-top: 10px;
-  padding: 5px;
+  padding: 10px;        /* Increased padding inside each result block */
   border: 1px solid #ccc;
   border-radius: 4px;
   width: 100%;
-  overflow: hidden; /* Use overflow: hidden as a robust container */
-  overflow-wrap: anywhere; /* Break long words to avoid page overflow */
+  overflow: hidden;     /* Robust container to hide overflow */
+  overflow-wrap: anywhere; /* Break long words to avoid overflow */
 }
 
 /* New class to handle long summary lines */
@@ -104,48 +126,32 @@ button {
 
 .result code { /* Inline code snippets */
   background-color: #f4f4f4;
-  padding: 2px 4px;
+  padding: 3px 5px;
   border-radius: 3px;
   word-wrap: break-word;
 }
+
 .result pre { /* Code blocks */
   background-color: #f4f4f4;
-  padding: 5px;
-  overflow-x: hidden; /* Hide horizontal scrollbar entirely */
-  white-space: pre-wrap; /* Wrap lines so code never forces the popup wider */
+  padding: 10px;         /* Increased padding for code blocks */
+  overflow-x: hidden;    /* Hide horizontal scrollbar entirely */
+  white-space: pre-wrap; /* Wrap lines so code never forces popup wider */
   word-break: break-all; /* Break long tokens to avoid overflow */
-  max-width: 100%; /* Constrain pre blocks within their container */
-  font-size: 12px; /* Slightly smaller text to fit more code */
+  max-width: 100%;       /* Constrain pre blocks within their container */
+  font-size: 12px;       /* Slightly smaller text to fit more code */
 }
 
-.provider-openai h2 {
-  color: #ff4b4b;
-}
-.provider-grok h2 {
-  color: #00a47e;
-}
-.provider-gemini h2 {
-  color: #4285f4;
-}
-
-.copy-btn {
-  float: right;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-#history {
-  margin-top: 10px;
-  border-top: 1px solid #ccc;
-}
-
+/* Ensure the results container never overflows horizontally */
 #results {
-  overflow-wrap: anywhere; /* Ensure long content doesn't force horizontal scrolling */
+  width: 100%;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
 }
 
+/* Ensure history items wrap within their container to prevent overflow */
 .history-item {
   margin-top: 5px;
-  padding: 5px;
+  padding: 8px;          /* Increased padding for history items */
   border: 1px solid #eee;
   cursor: pointer;
   overflow: hidden;
@@ -159,28 +165,31 @@ button {
 
 .question-group {
   margin-top: 10px;
-  width: 100%;
+  width: 100%;           /* Ensure full width of container */
+  overflow-x: hidden;
 }
 
 .user-question {
   font-weight: bold;
   margin-bottom: 5px;
   word-wrap: break-word; /* Allow long questions to wrap */
-  word-break: break-all; /* More aggressive wrapping for questions too */
+  word-break: break-all; /* More aggressive wrapping for questions */
 }
-
 
 /* Nicer scrollbars for preformatted text blocks within results */
 .result pre::-webkit-scrollbar {
   height: 8px;
 }
+
 .result pre::-webkit-scrollbar-track {
   background: #e0e0e0;
 }
+
 .result pre::-webkit-scrollbar-thumb {
   background: #adadad;
   border-radius: 4px;
 }
+
 .result pre::-webkit-scrollbar-thumb:hover {
   background: #838383;
 }
@@ -189,4 +198,5 @@ button {
   font-size: 12px;
   margin-bottom: 5px;
   overflow-wrap: anywhere;
+  overflow-x: hidden;
 }
