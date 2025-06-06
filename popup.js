@@ -20,7 +20,7 @@ let currentThreadId = null;
 let providerToggles = { openai: true, grok: true, gemini: true };
 
 function updatePopupWidth() {
-  const max = 1000; // allow a bit more room for long content
+  const max = 800; // Chrome popups max out around this width
   requestAnimationFrame(() => {
     document.body.style.width = 'auto';
     document.documentElement.style.width = 'auto';
