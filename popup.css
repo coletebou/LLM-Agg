@@ -3,7 +3,8 @@ body {
   padding: 10px;
   min-width: 300px;
   width: fit-content;
-  max-width: 800px;
+  max-width: 1000px;
+  overflow-y: auto;
 }
 h1 {
   font-size: 18px;
@@ -100,4 +101,33 @@ button {
 .user-question {
   font-weight: bold;
   margin-bottom: 5px;
+}
+
+/* Nicer scrollbars for the popup */
+body::-webkit-scrollbar {
+  width: 8px;
+}
+body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+body::-webkit-scrollbar-thumb {
+  background: #b5b5b5;
+  border-radius: 4px;
+}
+body::-webkit-scrollbar-thumb:hover {
+  background: #909090;
+}
+
+.result pre::-webkit-scrollbar {
+  height: 8px;
+}
+.result pre::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.result pre::-webkit-scrollbar-thumb {
+  background: #b5b5b5;
+  border-radius: 4px;
+}
+.result pre::-webkit-scrollbar-thumb:hover {
+  background: #909090;
 }
