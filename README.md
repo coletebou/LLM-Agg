@@ -31,6 +31,7 @@ This folder holds a lightweight Chrome extension that queries multiple language 
 
 ## Usage
 Open the extension popup, enter a question and press **Ask**. Responses from OpenAI, Grok and Gemini will appear in separate columns. A summary line shows which model responded, token counts and the estimated cost. Follow-up prompts keep a conversation going by resending the previous messages.
+The popup also displays the date and time of the most recent pull request to this repository so you can confirm you're running the latest code.
 
 ## Available Models
 

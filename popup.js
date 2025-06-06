@@ -212,6 +212,25 @@ function hideHistory() {
   }
 }
 
+async function showLastPRDate() {
+  const el = document.getElementById('last-pr-date');
+  if (!el) return;
+  try {
+    const res = await fetch('https://api.github.com/repos/coletebou/LLM-Agg/pulls?state=closed&sort=updated&direction=desc&per_page=1');
+    if (!res.ok) throw new Error('Request failed');
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      const pr = data[0];
+      const date = pr.merged_at || pr.closed_at || pr.updated_at || pr.created_at;
+      el.textContent = 'Last PR: ' + new Date(date).toLocaleString();
+    } else {
+      el.textContent = 'Last PR: none';
+    }
+  } catch (e) {
+    el.textContent = 'Last PR: unavailable';
+  }
+}
+
 function renderHistory() {
   const container = document.getElementById('history');
   if (!container) return;
@@ -554,9 +573,10 @@ async function askAll(question) {
 
 async function init() {
   await loadSecrets();
-  await loadSettings(); 
+  await loadSettings();
   await loadPricing();
   await loadToggles();
+  await showLastPRDate();
   loadHistory();
   const form = document.getElementById('question-form');
   const questionInput = document.getElementById('question');
