@@ -184,3 +184,8 @@ body::-webkit-scrollbar-thumb:hover {
 .result pre::-webkit-scrollbar-thumb:hover {
   background: #838383;
 }
+
+#last-pr-date {
+  font-size: 12px;
+  margin-bottom: 5px;
+}
