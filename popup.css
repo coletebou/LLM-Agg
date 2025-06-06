@@ -14,6 +14,12 @@ body {
   max-width: 800px;
   overflow-y: auto;
   overflow-x: hidden; /* This is our main guard against horizontal scrollbars appearing */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+}
+
+/* Hide scrollbar in Chromium based browsers */
+body::-webkit-scrollbar {
+  display: none;
 }
 h1 {
   font-size: 18px;
@@ -163,20 +169,6 @@ button {
   word-break: break-all; /* More aggressive wrapping for questions too */
 }
 
-/* Nicer scrollbars for the popup body */
-body::-webkit-scrollbar {
-  width: 8px;
-}
-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-body::-webkit-scrollbar-thumb {
-  background: #b5b5b5;
-  border-radius: 4px;
-}
-body::-webkit-scrollbar-thumb:hover {
-  background: #909090;
-}
 
 /* Nicer scrollbars for preformatted text blocks within results */
 .result pre::-webkit-scrollbar {
