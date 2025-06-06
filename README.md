@@ -84,3 +84,9 @@ gemini-1.5-flash-002
 gemini-1.0-pro-001
 text-embedding-004
 aqa
+
+## Contributing
+
+Development guidelines are in [AGENTS.md](AGENTS.md). Keep real API keys out of
+version control and update `pricing.json` or `manifest.json` when adding new
+providers or models.
