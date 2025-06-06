@@ -85,6 +85,7 @@ button {
   border-radius: 4px;
   width: 100%;
   overflow: hidden; /* Use overflow: hidden as a robust container */
+  overflow-wrap: anywhere; /* Break long words to avoid page overflow */
 }
 
 /* New class to handle long summary lines */
@@ -129,6 +130,10 @@ button {
 #history {
   margin-top: 10px;
   border-top: 1px solid #ccc;
+}
+
+#results {
+  overflow-wrap: anywhere; /* Ensure long content doesn't force horizontal scrolling */
 }
 
 .history-item {
