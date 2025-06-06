@@ -104,8 +104,10 @@ button {
 .result pre { /* Code blocks */
   background-color: #f4f4f4;
   padding: 5px;
-  overflow-x: auto; /* Allow horizontal scroll ONLY for pre-formatted code blocks */
-  white-space: pre;
+  overflow-x: auto; /* Keep scroll for extremely wide code if needed */
+  white-space: pre-wrap; /* Wrap lines to avoid forcing a horizontal scrollbar */
+  word-break: break-all; /* Break long tokens so they don't overflow */
+  font-size: 12px; /* Slightly smaller text to fit more code */
 }
 
 .provider-openai h2 {
