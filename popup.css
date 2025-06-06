@@ -2,10 +2,9 @@ body {
   font-family: Arial, sans-serif;
   padding: 10px;
   min-width: 300px;
-  width: fit-content;
   max-width: 800px;
   overflow-y: auto;
-  overflow-x: auto;
+  overflow-x: hidden; /* Changed from auto to hidden to prevent all horizontal scrolling on the body */
 }
 h1 {
   font-size: 18px;
@@ -16,15 +15,41 @@ h1 {
 #provider-toggles label {
   margin-right: 8px;
 }
-textarea {
-  width: 100%;
-  min-height: 60px;
-  resize: none;
-  overflow: hidden;
+
+/* Styles for the form containing the textarea */
+#question-form {
+  display: block; /* Ensure block behavior */
+  width: 100%;   /* Take full width of parent's (body) content area */
+  box-sizing: border-box; /* If form ever gets its own padding/border, they are contained */
+  overflow-x: hidden; /* Crucial: Clip any content within the form (like textarea) that tries to be wider */
+  margin: 0 0 5px 0; /* Add some bottom margin, ensure no horizontal margins */
+  padding: 0; /* Ensure no default paddings on the form itself */
 }
+
+/* Styles for the textarea input field */
+textarea#question {
+  display: block; /* Ensure it behaves as a block element for consistent width handling */
+  width: 100%;    /* Take 100% width of the #question-form */
+  max-width: 100%; /* Reinforce that it shouldn't exceed 100% of its container */
+  box-sizing: border-box; /* Include padding and border in the element's total width */
+  min-height: 60px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  /* margin-bottom: 5px; */ /* Margin moved to the form or can be kept if spacing between textarea and button is desired directly */
+  margin-left: 0;
+  margin-right: 0;
+  resize: none;
+  overflow-y: auto;   /* Allow vertical scroll if text exceeds min-height */
+  overflow-x: hidden; /* Prevent horizontal scrollbar *within* the textarea itself */
+}
+
 button {
   margin-top: 5px;
 }
+#ask { /* Specific margin for the ask button if needed, now that form has bottom margin */
+    margin-top: 0;
+}
+
 #clear-history {
   margin-top: 5px;
 }
