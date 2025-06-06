@@ -1,0 +1,103 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 10px;
+  min-width: 300px;
+  width: fit-content;
+  max-width: 600px;
+}
+h1 {
+  font-size: 18px;
+}
+#provider-toggles {
+  margin-bottom: 5px;
+}
+#provider-toggles label {
+  margin-right: 8px;
+}
+textarea {
+  width: 100%;
+  min-height: 60px;
+  resize: none;
+  overflow: hidden;
+}
+button {
+  margin-top: 5px;
+}
+#clear-history {
+  margin-top: 5px;
+}
+#loading {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+}
+#spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 5px;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.result {
+  margin-top: 10px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.result code {
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.result pre {
+  background-color: #f4f4f4;
+  padding: 5px;
+  overflow-x: auto;
+}
+
+.provider-openai h2 {
+  color: #ff4b4b;
+}
+.provider-grok h2 {
+  color: #00a47e;
+}
+.provider-gemini h2 {
+  color: #4285f4;
+}
+
+.copy-btn {
+  float: right;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#history {
+  margin-top: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.history-item {
+  margin-top: 5px;
+  padding: 5px;
+  border: 1px solid #eee;
+  cursor: pointer;
+}
+
+.history-item button {
+  float: right;
+}
+
+.question-group {
+  margin-top: 10px;
+}
+
+.user-question {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
