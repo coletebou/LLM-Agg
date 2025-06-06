@@ -216,7 +216,7 @@ async function showLastPRDate() {
   const el = document.getElementById('last-pr-date');
   if (!el) return;
   try {
-    const res = await fetch('https://api.github.com/repos/coletebou/LLM-Agg/pulls?state=all&sort=updated&direction=desc&per_page=1');
+    const res = await fetch('https://api.github.com/repos/coletebou/LLM-Agg/pulls?state=closed&sort=updated&direction=desc&per_page=1');
     if (!res.ok) throw new Error('Request failed');
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
