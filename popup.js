@@ -222,7 +222,8 @@ async function showLastPRDate() {
     if (Array.isArray(data) && data.length > 0) {
       const pr = data[0];
       const date = pr.merged_at || pr.closed_at || pr.updated_at || pr.created_at;
-      el.textContent = 'Last PR: ' + new Date(date).toLocaleString();
+      const dateStr = new Date(date).toLocaleString();
+      el.textContent = 'Last PR: ' + pr.title + ' (' + dateStr + ')';
     } else {
       el.textContent = 'Last PR: none';
     }

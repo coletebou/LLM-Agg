@@ -18,6 +18,9 @@ This folder holds a lightweight Chrome extension that queries multiple language 
 3. Optionally adjust token prices in `pricing.json` (values are dollars per **million** tokens).
 4. In Chrome, open `chrome://extensions` and enable **Developer mode**.
 5. Click **Load unpacked** and choose this `LLM-Agg-Extension` folder.
+6. The extension fetches the most recent pull request from GitHub to display
+   its title and timestamp. The manifest already grants access to
+   `https://api.github.com/*` for this purpose.
 
 ## Project Files
 - `manifest.json` – Declares extension permissions and points to `popup.html`.
@@ -31,7 +34,7 @@ This folder holds a lightweight Chrome extension that queries multiple language 
 
 ## Usage
 Open the extension popup, enter a question and press **Ask**. Responses from OpenAI, Grok and Gemini will appear in separate columns. A summary line shows which model responded, token counts and the estimated cost. Follow-up prompts keep a conversation going by resending the previous messages.
-The popup also displays the date and time of the most recent pull request to this repository so you can confirm you're running the latest code.
+The popup also shows the title and timestamp of the most recent pull request to this repository so you can confirm you're running the latest code.
 
 ## Available Models
 
