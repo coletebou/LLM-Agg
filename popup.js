@@ -39,16 +39,15 @@ function updatePopupWidth() {
   const cssMinWidth = 300;
 
   requestAnimationFrame(() => {
-    // Temporarily let the body expand to its natural width.
+    // Temporarily let the body expand to its natural width for measurement
     const originalWidth = document.body.style.width;
     document.body.style.width = 'max-content';
 
     const scrollWidth = document.body.scrollWidth;
-    const scrollbarWidth = document.body.offsetWidth - document.body.clientWidth;
 
     document.body.style.width = originalWidth;
 
-    let newWidth = Math.ceil(scrollWidth + scrollbarWidth);
+    let newWidth = Math.ceil(scrollWidth);
     newWidth = Math.min(newWidth, cssMaxWidth);
     newWidth = Math.max(newWidth, cssMinWidth);
 
