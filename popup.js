@@ -34,10 +34,12 @@ let providerToggles = { openai: true, grok: true, gemini: true };
 
 function updatePopupWidth() {
   const max = 800; // Chrome popups max out around this width
+  const min = 300; // Match popup.css min-width
   requestAnimationFrame(() => {
     document.body.style.width = 'auto';
     document.documentElement.style.width = 'auto';
-    const width = Math.min(document.body.scrollWidth, max);
+    const scroll = Math.max(document.body.scrollWidth, min);
+    const width = Math.min(scroll, max);
     document.documentElement.style.width = width + 'px';
     document.body.style.width = width + 'px';
   });
