@@ -200,3 +200,33 @@ button {
   overflow-wrap: anywhere;
   overflow-x: hidden;
 }
+
+/* Result header with LLM name and copy button */
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.copy-btn {
+  cursor: pointer;
+  font-size: 12px;
+  color: #007bff;
+}
+
+.provider-name {
+  margin: 0;
+}
+
+/* Provider-specific name colors */
+.provider-openai .provider-name {
+  color: #10a37f;
+}
+
+.provider-grok .provider-name {
+  color: #d97706;
+}
+
+.provider-gemini .provider-name {
+  color: #6366f1;
+}

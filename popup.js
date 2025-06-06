@@ -385,7 +385,11 @@ async function showResult(container, label, result, modelName, provider) {
 
   const frag = document.createDocumentFragment();
 
+  const header = document.createElement('div');
+  header.className = 'result-header';
+
   const title = document.createElement('h2');
+  title.className = 'provider-name';
   title.textContent = label;
 
   const copy = document.createElement('span');
@@ -403,7 +407,9 @@ async function showResult(container, label, result, modelName, provider) {
     }
     document.body.removeChild(textarea);
   });
-  title.appendChild(copy);
+
+  header.appendChild(title);
+  header.appendChild(copy);
 
   const content = document.createElement('div');
   content.innerHTML = await parseMarkdown(result.text);
@@ -444,7 +450,7 @@ async function showResult(container, label, result, modelName, provider) {
     timing.textContent = `Response time: ${secs}s`;
   }
 
-  frag.appendChild(title);
+  frag.appendChild(header);
   frag.appendChild(content);
   frag.appendChild(summary);
   if (timing.textContent) frag.appendChild(timing);
