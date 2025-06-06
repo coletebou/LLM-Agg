@@ -32,27 +32,33 @@ let threads = [];
 let currentThreadId = null;
 let providerToggles = { openai: true, grok: true, gemini: true };
 
+// Function to update the popup width dynamically
 function updatePopupWidth() {
-  const max = 800; // Chrome popups max out around this width
+  const cssMaxWidth = 800;
+  const cssMinWidth = 300;
+
   requestAnimationFrame(() => {
-    // To correctly calculate the content width, we need to let the body expand.
-    // Temporarily setting the width to 'max-content' forces it to the width of its widest content.
+    // To accurately measure the required width, we temporarily allow the body
+    // to size itself to its content's maximum width.
     const originalBodyWidth = document.body.style.width;
     document.body.style.width = 'max-content';
 
-    const scrollWidth = document.body.scrollWidth;
+    // Measure the resulting scrollWidth.
+    let newWidth = document.body.scrollWidth;
 
-    // Restore the original body width style.
+    // Immediately restore the original body width style to prevent flicker or layout shifts.
     document.body.style.width = originalBodyWidth;
 
-    // Calculate the new width, capped by the max value.
-    const newWidth = Math.min(scrollWidth, max);
+    // Apply constraints.
+    newWidth = Math.min(newWidth, cssMaxWidth);
+    newWidth = Math.max(newWidth, cssMinWidth);
 
-    // Apply the new width to both the html and body elements for consistency.
+    // Set the final, calculated width on both html and body.
     document.documentElement.style.width = newWidth + 'px';
     document.body.style.width = newWidth + 'px';
   });
 }
+
 
 // Loads non-sensitive settings like model names from settings.json
 async function loadSettings() {
@@ -148,6 +154,7 @@ function loadHistory() {
         document.getElementById('results').innerHTML = t.html;
       }
     }
+    updatePopupWidth();
   });
 }
 
@@ -174,16 +181,22 @@ function ensureThread(question) {
 
 function deleteHistoryItem(id) {
   threads = threads.filter((t) => t.id !== id);
-  if (currentThreadId === id) currentThreadId = null;
+  if (currentThreadId === id) {
+      document.getElementById('results').innerHTML = '';
+      currentThreadId = null;
+  }
   saveHistory();
   renderHistory();
+  updatePopupWidth();
 }
 
 function clearHistory() {
   threads = [];
   currentThreadId = null;
+  document.getElementById('results').innerHTML = '';
   saveHistory();
   renderHistory();
+  updatePopupWidth();
 }
 
 function showHistory() {
@@ -221,13 +234,14 @@ function renderHistory() {
     div.appendChild(del);
     div.addEventListener('click', () => {
       currentThreadId = t.id;
-      document.getElementById('results').innerHTML = t.html;
+      const currentThreadData = threads.find(th => th.id === currentThreadId);
+      document.getElementById('results').innerHTML = currentThreadData ? currentThreadData.html : '';
       saveHistory();
       hideHistory();
+      updatePopupWidth();
     });
     container.appendChild(div);
   });
-  updatePopupWidth();
 }
 
 function getUnitCost(provider, model) {
@@ -250,19 +264,19 @@ async function askChatGPT(messages) {
     const start = performance.now();
     const url = 'https://api.openai.com/v1/chat/completions';
     const payload = {
-      model: settings?.openai_model || 'gpt-3.5-turbo', // Use optional chaining for settings
+      model: settings?.openai_model || 'gpt-3.5-turbo', 
       messages
     };
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`, // Use imported key
+        'Authorization': `Bearer ${OPENAI_API_KEY}`, 
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
     if (!res.ok) {
-      const errorData = await res.text(); // Get more error details
+      const errorData = await res.text(); 
       return { text: `ChatGPT error: ${res.status} ${res.statusText}. Details: ${errorData}` };
     }
     const data = await res.json();
@@ -285,13 +299,13 @@ async function askGrok(messages) {
     const start = performance.now();
     const url = 'https://api.x.ai/v1/chat/completions';
     const payload = {
-      model: settings?.grok_model || 'grok-1', // Use optional chaining
+      model: settings?.grok_model || 'grok-1', 
       messages
     };
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROK_API_KEY}`, // Use imported key
+        'Authorization': `Bearer ${GROK_API_KEY}`, 
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
@@ -318,8 +332,8 @@ async function askGemini(messages) {
   }
   try {
     const start = performance.now();
-    const model = settings?.gemini_model || 'gemini-pro'; // Use optional chaining
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`; // Use imported key
+    const model = settings?.gemini_model || 'gemini-pro'; 
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`; 
     const payload = {
       contents: messages.map((m) => ({
         role: m.role === 'user' ? 'user' : 'model',
@@ -361,8 +375,6 @@ async function showResult(container, label, result, modelName, provider) {
   copy.className = 'copy-btn';
   copy.textContent = 'Copy';
   copy.addEventListener('click', () => {
-    // navigator.clipboard.writeText requires a secure context (HTTPS) or user activation
-    // For extensions, a more reliable way is to use document.execCommand('copy')
     const textarea = document.createElement('textarea');
     textarea.value = result.text;
     document.body.appendChild(textarea);
@@ -380,6 +392,7 @@ async function showResult(container, label, result, modelName, provider) {
   content.innerHTML = await parseMarkdown(result.text);
 
   const summary = document.createElement('div');
+  summary.className = 'result-summary'; // Add class for specific styling
   const usage = result.usage || {};
   const inputTokens =
     usage.prompt_tokens ??
@@ -408,6 +421,7 @@ async function showResult(container, label, result, modelName, provider) {
     `Total Cost: $${totalCost}`;
 
   const timing = document.createElement('div');
+  timing.className = 'result-summary'; // Add class for specific styling
   if (typeof result.duration === 'number') {
     const secs = (result.duration / 1000).toFixed(2);
     timing.textContent = `Response time: ${secs}s`;
@@ -423,8 +437,8 @@ async function showResult(container, label, result, modelName, provider) {
 }
 
 async function askAll(question) {
-  const resultsEl = document.getElementById('results'); // Renamed to avoid conflict
-  const loadingEl = document.getElementById('loading'); // Renamed
+  const resultsEl = document.getElementById('results'); 
+  const loadingEl = document.getElementById('loading'); 
   const textEl = document.getElementById('loading-text');
   const activeProviders = ['openai', 'grok', 'gemini'].filter(
     (p) => providerToggles[p]
@@ -440,7 +454,7 @@ async function askAll(question) {
 
   ensureThread(question);
   const thread = threads.find((t) => t.id === currentThreadId);
-  if (!thread) { // Should not happen if ensureThread works
+  if (!thread) { 
       console.error("Current thread not found after ensureThread");
       loadingEl.style.display = 'none';
       return;
@@ -450,7 +464,7 @@ async function askAll(question) {
   thread.geminiMessages.push({ role: 'user', content: question });
   const group = document.createElement('div');
   group.className = 'question-group';
-  resultsEl.prepend(group); // Use renamed variable
+  resultsEl.prepend(group); 
 
   const qDiv = document.createElement('div');
   qDiv.className = 'user-question';
@@ -458,7 +472,7 @@ async function askAll(question) {
   group.appendChild(qDiv);
 
   const tasks = [];
-  const currentOpenAIMessages = [...thread.openaiMessages]; // Create copies for cache keying
+  const currentOpenAIMessages = [...thread.openaiMessages]; 
   const currentGrokMessages = [...thread.grokMessages];
   const currentGeminiMessages = [...thread.geminiMessages];
 
@@ -472,7 +486,7 @@ async function askAll(question) {
         } else {
           res = await askChatGPT(currentOpenAIMessages);
           await showResult(group, 'ChatGPT', res, settings?.openai_model || 'gpt-3.5-turbo', 'openai');
-          if (!res.text.includes("API Key not configured")) { // Don't cache error messages about missing keys
+          if (!res.text.includes("API Key not configured")) { 
             setCachedResponse('openai', currentOpenAIMessages, res);
           }
         }
@@ -525,23 +539,25 @@ async function askAll(question) {
 
   if (tasks.length === 0) {
     loadingEl.style.display = 'none';
+    updatePopupWidth();
     return;
   }
 
   Promise.allSettled(tasks).then(() => {
     loadingEl.style.display = 'none';
-    const finalThread = threads.find((t) => t.id === currentThreadId); // Re-fetch thread to ensure it's the latest
+    const finalThread = threads.find((t) => t.id === currentThreadId); 
     if (finalThread) {
-      finalThread.html = resultsEl.innerHTML; // Use renamed variable
+      finalThread.html = resultsEl.innerHTML; 
       saveHistory();
       renderHistory();
     }
+    updatePopupWidth();
   });
 }
 
 async function init() {
   await loadSecrets();
-  await loadSettings(); // Load non-sensitive settings first
+  await loadSettings(); 
   await loadPricing();
   await loadToggles();
   loadHistory();
@@ -553,8 +569,6 @@ async function init() {
       const q = questionInput.value.trim();
       if (q) {
         askAll(q);
-        // questionInput.value = ''; // Optionally clear input after asking
-        // questionInput.style.height = 'auto'; // Reset height
       }
     });
     questionInput.addEventListener('keydown', (e) => {
@@ -563,14 +577,13 @@ async function init() {
         const q = questionInput.value.trim();
         if (q) {
           askAll(q);
-          // questionInput.value = ''; // Optionally clear input after asking
-          // questionInput.style.height = 'auto'; // Reset height
         }
       }
     });
     questionInput.addEventListener('input', () => {
       questionInput.style.height = 'auto';
       questionInput.style.height = questionInput.scrollHeight + 'px';
+      updatePopupWidth();
     });
   }
   const clr = document.getElementById('clear-history');
@@ -594,8 +607,8 @@ async function init() {
       currentThreadId = null;
       document.getElementById('results').innerHTML = '';
       document.getElementById('question').value = '';
-      saveHistory(); // Save the fact that currentThreadId is null
-      renderHistory(); // Re-render history which should be empty or show no active thread
+      saveHistory(); 
+      renderHistory(); 
       updatePopupWidth();
     });
   }
