@@ -196,4 +196,5 @@ body::-webkit-scrollbar-thumb:hover {
 #last-pr-date {
   font-size: 12px;
   margin-bottom: 5px;
+  overflow-wrap: anywhere;
 }
