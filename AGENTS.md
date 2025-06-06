@@ -25,3 +25,10 @@ their answers side by side. Key files:
 - No automated tests or build scripts exist. After changes, reload the
   unpacked extension in Chrome to test.
 - Provide concise commit messages summarizing your changes.
+
+## Development Notes
+- Keep `settings.json` committed only with placeholder keys. Real credentials
+  must remain local and are ignored via `.gitignore`.
+- Document new providers in the README and update `manifest.json` with any
+  required host permissions.
+- Keep model lists in README sorted alphabetically.
