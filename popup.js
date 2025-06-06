@@ -20,7 +20,7 @@ let currentThreadId = null;
 let providerToggles = { openai: true, grok: true, gemini: true };
 
 function updatePopupWidth() {
-  const max = 600;
+  const max = 800;
   document.body.style.width = 'auto';
   document.documentElement.style.width = 'auto';
   const width = Math.min(document.body.scrollWidth, max);
