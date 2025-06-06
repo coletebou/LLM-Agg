@@ -33,7 +33,7 @@ This folder holds a lightweight Chrome extension that queries multiple language 
 - `pricing.json` – Token price data used to estimate request cost.
 
 ## Usage
-Open the extension popup, enter a question and press **Ask**. Responses from OpenAI, Grok and Gemini will appear in separate columns. A summary line shows which model responded, token counts and the estimated cost. Follow-up prompts keep a conversation going by resending the previous messages.
+Open the extension popup, enter a question and press **Ask**. Responses from OpenAI, Grok and Gemini will appear in separate columns. A summary line shows which model responded, token counts and the estimated cost. Follow-up prompts keep a conversation going by resending the previous messages. A **Cancel** button appears while answers are loading so you can stop the requests if needed.
 The popup also shows the title and timestamp of the most recent pull request to this repository so you can confirm you're running the latest code.
 
 ## Available Models
