@@ -4,8 +4,10 @@
   "description": "Query multiple LLM providers and view the results side by side.",
   "version": "1.0.0",
   "action": {
-    "default_title": "LLM Aggregator",
-    "default_popup": "popup.html"
+    "default_title": "LLM Aggregator"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "permissions": ["storage"],
   "host_permissions": [

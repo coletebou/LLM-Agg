@@ -23,9 +23,10 @@ This folder holds a lightweight Chrome extension that queries multiple language 
    `https://api.github.com/*` for this purpose.
 
 ## Project Files
-- `manifest.json` – Declares extension permissions and points to `popup.html`.
-- `popup.html` – The popup's HTML structure.
-- `popup.css` – Styles for the popup window.
+- `manifest.json` – Declares extension permissions and registers the background script.
+- `index.html` – Full-page interface opened in a new tab.
+- `popup.html` – (legacy) the original popup HTML.
+- `popup.css` – Shared styles for both the popup and page.
 - `popup.js` – Fetches answers from each provider and maintains conversation history.
 - `markdownWorker.js` – Web worker that sanitizes and renders Markdown.
 - `secrets.js` – **Untracked file** where you place your API keys.
@@ -33,8 +34,8 @@ This folder holds a lightweight Chrome extension that queries multiple language 
 - `pricing.json` – Token price data used to estimate request cost.
 
 ## Usage
-Open the extension popup, enter a question and press **Ask**. Responses from OpenAI, Grok and Gemini will appear in separate columns. A summary line shows which model responded, token counts and the estimated cost. Follow-up prompts keep a conversation going by resending the previous messages. A **Cancel** button appears while answers are loading so you can stop the requests if needed.
-The popup also shows the title and timestamp of the most recent pull request to this repository so you can confirm you're running the latest code.
+Click the extension icon and a new tab opens with the LLM Aggregator page. Enter a question and press **Ask** to query OpenAI, Grok and Gemini side by side. A summary line shows which model responded, token counts and the estimated cost. Follow-up prompts keep a conversation going by resending the previous messages. A **Cancel** button appears while answers are loading so you can stop the requests if needed.
+The page also shows the title and timestamp of the most recent pull request to this repository so you can confirm you're running the latest code.
 
 ## Available Models
 
