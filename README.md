@@ -3,10 +3,19 @@
 This folder holds a lightweight Chrome extension that queries multiple language model providers and shows their answers side by side. It relies only on standard HTML, CSS and JavaScript.
 
 ## Setup
-1. Edit `settings.json` with your API keys and preferred model names.
-2. Optionally adjust token prices in `pricing.json` (values are dollars per **million** tokens).
-3. In Chrome, open `chrome://extensions` and enable **Developer mode**.
-4. Click **Load unpacked** and choose this `LLM-Agg-Extension` folder.
+1. Create a `secrets.js` file containing your API keys.
+   It should export constants `OPENAI_API_KEY`, `GROK_API_KEY` and `GEMINI_API_KEY`.
+   Example:
+   ```js
+   export const OPENAI_API_KEY = 'sk-...';
+   export const GROK_API_KEY = '...';
+   export const GEMINI_API_KEY = '...';
+   ```
+   Keep this file local and never commit real keys.
+2. Edit `settings.json` with your preferred model names.
+3. Optionally adjust token prices in `pricing.json` (values are dollars per **million** tokens).
+4. In Chrome, open `chrome://extensions` and enable **Developer mode**.
+5. Click **Load unpacked** and choose this `LLM-Agg-Extension` folder.
 
 ## Project Files
 - `manifest.json` – Declares extension permissions and points to `popup.html`.
@@ -14,7 +23,8 @@ This folder holds a lightweight Chrome extension that queries multiple language 
 - `popup.css` – Styles for the popup window.
 - `popup.js` – Fetches answers from each provider and maintains conversation history.
 - `markdownWorker.js` – Web worker that sanitizes and renders Markdown.
-- `settings.json` – API keys and default models. **Do not expose real credentials.**
+- `secrets.js` – **Untracked file** where you place your API keys.
+- `settings.json` – Preferred model names. This file contains no secrets.
 - `pricing.json` – Token price data used to estimate request cost.
 
 ## Usage
