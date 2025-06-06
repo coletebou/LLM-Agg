@@ -35,11 +35,22 @@ let providerToggles = { openai: true, grok: true, gemini: true };
 function updatePopupWidth() {
   const max = 800; // Chrome popups max out around this width
   requestAnimationFrame(() => {
-    document.body.style.width = 'auto';
-    document.documentElement.style.width = 'auto';
-    const width = Math.min(document.body.scrollWidth, max);
-    document.documentElement.style.width = width + 'px';
-    document.body.style.width = width + 'px';
+    // To correctly calculate the content width, we need to let the body expand.
+    // Temporarily setting the width to 'max-content' forces it to the width of its widest content.
+    const originalBodyWidth = document.body.style.width;
+    document.body.style.width = 'max-content';
+
+    const scrollWidth = document.body.scrollWidth;
+
+    // Restore the original body width style.
+    document.body.style.width = originalBodyWidth;
+
+    // Calculate the new width, capped by the max value.
+    const newWidth = Math.min(scrollWidth, max);
+
+    // Apply the new width to both the html and body elements for consistency.
+    document.documentElement.style.width = newWidth + 'px';
+    document.body.style.width = newWidth + 'px';
   });
 }
 
