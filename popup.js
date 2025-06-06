@@ -20,12 +20,14 @@ let currentThreadId = null;
 let providerToggles = { openai: true, grok: true, gemini: true };
 
 function updatePopupWidth() {
-  const max = 800;
-  document.body.style.width = 'auto';
-  document.documentElement.style.width = 'auto';
-  const width = Math.min(document.body.scrollWidth, max);
-  document.documentElement.style.width = width + 'px';
-  document.body.style.width = width + 'px';
+  const max = 1000; // allow a bit more room for long content
+  requestAnimationFrame(() => {
+    document.body.style.width = 'auto';
+    document.documentElement.style.width = 'auto';
+    const width = Math.min(document.body.scrollWidth, max);
+    document.documentElement.style.width = width + 'px';
+    document.body.style.width = width + 'px';
+  });
 }
 
 // Loads non-sensitive settings like model names from settings.json
