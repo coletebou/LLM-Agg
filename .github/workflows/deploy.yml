@@ -7,31 +7,33 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Files to Bluehost
     steps:
-      # Step 1: Check out your repository code. Using v4 is the current best practice.
-      - name: Checkout repository
+      # Use the latest major version of the checkout action
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # Step 2: Deploy the files using the action you found.
       - name: Deploy to Server via SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.6
         with:
-          # This must be your cPanel username, not 'root'.
-          # It's correctly pulling from the secret you already created.
+          # Your cPanel username from GitHub Secrets
           username: ${{ secrets.FTP_USERNAME }}
           
-          # Your server's IP address from your GitHub secret.
+          # Your server's IP address from GitHub Secrets
           server: ${{ secrets.FTP_SERVER }}
           
-          # Your private key for authentication.
+          # The SFTP port is always 22 for Bluehost
+          port: 22
+          
+          # Your SSH private key (which you just fixed and re-saved)
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           
-          # This tells the action to upload ALL files and folders from your
-          # repository's root directory.
+          # The passphrase for your SSH key, if it has one
+          ssh_passphrase: ${{ secrets.SSH_PASSPHRASE }}
+
+          # This uploads ALL files from your repository's root
           local_path: './*'
           
-          # The absolute path to your subdomain's folder on the server.
-          # This is the full path we identified from your previous logs.
+          # The correct, absolute path to your deployment folder on Bluehost
           remote_path: '/home3/cpwwhamy/public_html/llm/'
           
-          # Optional: You can keep these extra arguments.
-          sftpArgs: '-o ConnectTimeout=5'
+          # This is a good setting to explicitly use SFTP
+          sftp_only: true
