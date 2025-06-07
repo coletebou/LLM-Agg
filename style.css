@@ -3,6 +3,7 @@ html {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape */
 }
 *, *:before, *:after {
   box-sizing: inherit;
@@ -261,7 +262,7 @@ button {
   font-weight: bold;
 }
 
-/* Mobile responsive design */
+/* Mobile-specific styles */
 @media (max-width: 768px) {
   .tabs {
     display: flex;
@@ -292,6 +293,25 @@ button {
   .tab.active.openai { background: #e6f7f3; }
   .tab.active.grok { background: #fef3c7; }
   .tab.active.gemini { background: #ede9fe; }
+
+  textarea#question {
+    font-size: 16px; /* Prevent zoom on iOS by using minimum 16px font size */
+    padding: 12px;   /* Larger touch target */
+  }
+
+  button {
+    min-height: 44px; /* Minimum touch target size */
+    padding: 12px;    /* Larger touch target */
+    font-size: 16px;  /* Readable text size */
+  }
+
+  .result {
+    font-size: 16px; /* Ensure result text is readable */
+  }
+
+  .result-summary {
+    font-size: 14px; /* Slightly larger than desktop for better readability */
+  }
 }
 
 /* Desktop styles */
