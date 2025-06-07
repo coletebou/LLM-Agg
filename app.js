@@ -231,13 +231,13 @@ function renderHistory() {
     div.appendChild(del);
     div.addEventListener('click', () => {
       currentThreadId = t.id;
-      const currentThreadData = threads.find(th => th.id === currentThreadId);
+      const currentThreadData = threads.find((th) => th.id === currentThreadId);
       document.getElementById('results').innerHTML = currentThreadData ? currentThreadData.html : '';
       saveHistory();
       hideHistory();
       updatePopupWidth();
     });
-    container.appendChild(div);
+    historyItems.appendChild(div);
   });
 }
 

@@ -242,8 +242,9 @@ async function showLastPRDate() {
 
 function renderHistory() {
   const container = document.getElementById('history');
-  if (!container) return;
-  container.innerHTML = '';
+  const historyItems = container?.querySelector('.history-items');
+  if (!container || !historyItems) return;
+  historyItems.innerHTML = '';
   threads.forEach((t) => {
     const div = document.createElement('div');
     div.className = 'history-item';
@@ -265,7 +266,7 @@ function renderHistory() {
       hideHistory();
       updatePopupWidth();
     });
-    container.appendChild(div);
+    historyItems.appendChild(div);
   });
 }
 
