@@ -97,10 +97,18 @@ function saveToggles() {
 async function hashMessages(provider, messages) {
   const str = provider + JSON.stringify(messages);
   const buffer = new TextEncoder().encode(str);
-  const digest = await crypto.subtle.digest('SHA-256', buffer);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  if (crypto.subtle && crypto.subtle.digest) {
+    const digest = await crypto.subtle.digest('SHA-256', buffer);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+  // Fallback for insecure contexts where SubtleCrypto is unavailable
+  let hash = 0;
+  for (const byte of buffer) {
+    hash = (hash * 31 + byte) >>> 0;
+  }
+  return hash.toString(16);
 }
 
 async function getCachedResponse(provider, messages) {
