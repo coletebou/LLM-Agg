@@ -16,12 +16,16 @@
   </div>
   <form id="question-form">
     <textarea id="question" placeholder="Ask a question (Enter to submit, Shift+Enter for new line)"></textarea>
-    <button id="ask" type="submit">Ask</button>
+    <div class="button-row">
+      <button id="ask" type="submit">Ask</button>
+      <button type="button" id="new-chat">New Chat</button>
+      <button type="button" id="toggle-history">Show History</button>
+    </div>
   </form>
-  <button id="new-chat">New Chat</button>
-  <button id="toggle-history">Show History</button>
-  <button id="clear-history">Clear History</button>
-  <div id="history" style="display: none;"></div>
+  <div id="history" style="display: none;">
+    <!-- History content will be added here -->
+    <button id="clear-history" style="display: none;">Clear History</button>
+  </div>
   <div id="loading" style="display: none;">
     <div id="spinner"></div>
     <span id="loading-text">Loading...</span>

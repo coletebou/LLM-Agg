@@ -164,16 +164,20 @@ function clearHistory() {
 
 function showHistory() {
   const container = document.getElementById('history');
+  const clearBtn = document.getElementById('clear-history');
   if (container) {
     container.style.display = 'block';
+    if (clearBtn) clearBtn.style.display = 'block';
     updatePopupWidth();
   }
 }
 
 function hideHistory() {
   const container = document.getElementById('history');
+  const clearBtn = document.getElementById('clear-history');
   if (container) {
     container.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
     updatePopupWidth();
   }
 }
