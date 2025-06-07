@@ -1,31 +1,37 @@
-name: Deploy to Bluehost via SFTP
+name: Deploy to Bluehost Server
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
-  deploy:
+  deploy_job:
     runs-on: ubuntu-latest
+    name: Deploy Files to Bluehost
     steps:
-      # 1. Checks out your repository's code so the workflow can access it.
+      # Step 1: Check out your repository code. Using v4 is the current best practice.
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. This step uses the correct, dedicated SFTP action.
-      - name: SFTP Deploy
-        # This is a popular and well-maintained SFTP-specific action.
-        uses: easingthemes/sftp-deploy@v3.2.0
+      # Step 2: Deploy the files using the action you found.
+      - name: Deploy to Server via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
         with:
-          # Your SSH private key, stored as a repository secret.
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          # This must be your cPanel username, not 'root'.
+          # It's correctly pulling from the secret you already created.
+          username: ${{ secrets.FTP_USERNAME }}
           
-          # Your server's IP address (maps to your FTP_SERVER secret).
-          REMOTE_HOST: ${{ secrets.FTP_SERVER }}
+          # Your server's IP address from your GitHub secret.
+          server: ${{ secrets.FTP_SERVER }}
           
-          # Your cPanel username (maps to your FTP_USERNAME secret).
-          REMOTE_USER: ${{ secrets.FTP_USERNAME }}
+          # Your private key for authentication.
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           
-          # The destination directory on your Bluehost server.
-          TARGET: /home3/cpwwhamy/public_html/llm/
+          # This tells the action to upload ALL files and folders from your
+          # repository's root directory.
+          local_path: './*'
+          
+          # The absolute path to your subdomain's folder on the server.
+          # This is the full path we identified from your previous logs.
+          remote_path: '/home3/cpwwhamy/public_html/llm/'
+          
+          # Optional: You can keep these extra arguments.
+          sftpArgs: '-o ConnectTimeout=5'
