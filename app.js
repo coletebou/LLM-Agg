@@ -1,18 +1,5 @@
-// API keys will be loaded from an optional secrets.js file
-let OPENAI_API_KEY = 'API-KEY-HERE';
-let GROK_API_KEY = 'API-KEY-HERE';
-let GEMINI_API_KEY = 'API-KEY-HERE';
-
-async function loadSecrets() {
-  try {
-    const secrets = await import('./secrets.js');
-    OPENAI_API_KEY = secrets.OPENAI_API_KEY;
-    GROK_API_KEY = secrets.GROK_API_KEY;
-    GEMINI_API_KEY = secrets.GEMINI_API_KEY;
-  } catch (e) {
-    console.warn('secrets.js not found, using placeholder API keys');
-  }
-}
+// This file has been updated to use a secure PHP proxy.
+// It no longer contains or loads API keys directly.
 
 const mdWorker = new Worker('markdownWorker.js');
 function parseMarkdown(md) {
@@ -265,117 +252,91 @@ function getUnitCost(provider, model) {
   return { input, output };
 }
 
-async function askChatGPT(messages, signal) {
-  if (!OPENAI_API_KEY || OPENAI_API_KEY === "API-KEY-HERE") {
-    return { text: "OpenAI API Key not configured in secrets.js" };
-  }
+
+// --- START: New Proxy-based API functions ---
+
+// A single, generic function to call our proxy.
+// This function sends requests to our proxy.php file instead of directly to the API providers.
+async function askProxy(provider, payload, signal, modelNameForGemini = null) {
   try {
     const start = performance.now();
-    const url = 'https://api.openai.com/v1/chat/completions';
-    const payload = {
-      model: settings?.openai_model || 'gpt-3.5-turbo', 
-      messages
+    const url = 'proxy.php'; // The URL of our new PHP proxy file
+
+    let proxyPayload = {
+      provider: provider,
+      payload: payload
     };
+    
+    // Gemini needs the model name in its URL, which is constructed by the proxy.
+    // We pass the model name along in the payload for the proxy to use.
+    if (provider === 'gemini' && modelNameForGemini) {
+        proxyPayload.payload.model = modelNameForGemini;
+    }
+
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload),
-      signal
+      body: JSON.stringify(proxyPayload),
+      signal // Pass the AbortController's signal to make the request cancellable
     });
+
     if (!res.ok) {
-      const errorData = await res.text(); 
-      return { text: `ChatGPT error: ${res.status} ${res.statusText}. Details: ${errorData}` };
+      const errorData = await res.text();
+      return { text: `${provider} proxy error: ${res.status} ${res.statusText}. Details: ${errorData}` };
     }
+
     const data = await res.json();
     const duration = performance.now() - start;
-    return {
-      text: data.choices?.[0]?.message?.content || 'No response',
-      usage: data.usage,
-      duration
-    };
+    
+    // The response structure is slightly different for Gemini.
+    if (provider === 'gemini') {
+        const cand = data.candidates?.[0];
+        return {
+            text: cand?.content?.parts?.[0]?.text || 'No response',
+            usage: data.usageMetadata,
+            duration
+        };
+    } else {
+        return {
+            text: data.choices?.[0]?.message?.content || 'No response',
+            usage: data.usage,
+            duration
+        };
+    }
   } catch (err) {
     if (err.name === 'AbortError') return { canceled: true };
-    return { text: `ChatGPT error: ${err}` };
+    return { text: `${provider} proxy error: ${err}` };
   }
+}
+
+// Update the original functions to use the new proxy function.
+// Their purpose now is to prepare the payload in the correct format for each provider.
+async function askChatGPT(messages, signal) {
+  const payload = { model: settings?.openai_model || 'gpt-3.5-turbo', messages };
+  return await askProxy('openai', payload, signal);
 }
 
 async function askGrok(messages, signal) {
-  if (!GROK_API_KEY || GROK_API_KEY === "API-KEY-HERE") {
-    return { text: "Grok API Key not configured in secrets.js" };
-  }
-  try {
-    const start = performance.now();
-    const url = 'https://api.x.ai/v1/chat/completions';
-    const payload = {
-      model: settings?.grok_model || 'grok-1', 
-      messages
-    };
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROK_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload),
-      signal
-    });
-    if (!res.ok) {
-      const errorData = await res.text();
-      return { text: `Grok error: ${res.status} ${res.statusText}. Details: ${errorData}` };
-    }
-    const data = await res.json();
-    const duration = performance.now() - start;
-    return {
-      text: data.choices?.[0]?.message?.content || 'No response',
-      usage: data.usage,
-      duration
-    };
-  } catch (err) {
-    if (err.name === 'AbortError') return { canceled: true };
-    return { text: `Grok error: ${err}` };
-  }
+  const payload = { model: settings?.grok_model || 'grok-1', messages };
+  return await askProxy('grok', payload, signal);
 }
 
 async function askGemini(messages, signal) {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === "API-KEY-HERE") {
-    return { text: "Gemini API Key not configured in secrets.js" };
-  }
-  try {
-    const start = performance.now();
-    const model = settings?.gemini_model || 'gemini-pro'; 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`; 
+    const model = settings?.gemini_model || 'gemini-pro';
     const payload = {
-      contents: messages.map((m) => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.content }]
-      }))
+        contents: messages.map((m) => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.content }]
+        }))
     };
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal
-    });
-    if (!res.ok) {
-      const errorData = await res.text();
-      return { text: `Gemini error: ${res.status} ${res.statusText}. Details: ${errorData}` };
-    }
-    const data = await res.json();
-    const duration = performance.now() - start;
-    const cand = data.candidates?.[0];
-    return {
-      text: cand?.content?.parts?.[0]?.text || 'No response',
-      usage: data.usageMetadata,
-      duration
-    };
-  } catch (err) {
-    if (err.name === 'AbortError') return { canceled: true };
-    return { text: `Gemini error: ${err}` };
-  }
+    // Pass the model name separately for Gemini's URL construction in the proxy.
+    return await askProxy('gemini', payload, signal, model);
 }
+
+// --- END: New Proxy-based API functions ---
+
 
 async function showResult(container, label, result, modelName, provider) {
   const div = document.createElement('div');
@@ -522,7 +483,7 @@ async function askAll(question) {
         }
         if (!res?.canceled) {
           await showResult(group, 'ChatGPT', res, settings?.openai_model || 'gpt-3.5-turbo', 'openai');
-          if (!cached && !res.text.includes("API Key not configured")) {
+          if (!cached && !res.text.includes("proxy error")) {
             setCachedResponse('openai', currentOpenAIMessages, res);
           }
           thread.openaiMessages.push({ role: 'assistant', content: res.text });
@@ -543,7 +504,7 @@ async function askAll(question) {
         }
         if (!res?.canceled) {
           await showResult(group, 'Grok', res, settings?.grok_model || 'grok-1', 'grok');
-          if (!cached && !res.text.includes("API Key not configured")) {
+          if (!cached && !res.text.includes("proxy error")) {
              setCachedResponse('grok', currentGrokMessages, res);
           }
           thread.grokMessages.push({ role: 'assistant', content: res.text });
@@ -564,7 +525,7 @@ async function askAll(question) {
         }
         if (!res?.canceled) {
           await showResult(group, 'Gemini', res, settings?.gemini_model || 'gemini-pro', 'gemini');
-          if (!cached && !res.text.includes("API Key not configured")) {
+          if (!cached && !res.text.includes("proxy error")) {
             setCachedResponse('gemini', currentGeminiMessages, res);
           }
           thread.geminiMessages.push({ role: 'assistant', content: res.text });
@@ -597,7 +558,7 @@ async function askAll(question) {
 }
 
 async function init() {
-  await loadSecrets();
+  // `loadSecrets()` is no longer needed and has been removed.
   await loadSettings();
   await loadPricing();
   await loadToggles();
