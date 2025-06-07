@@ -326,8 +326,38 @@ async function askGemini(messages, signal) {
 
 
 async function showResult(container, label, result, modelName, provider) {
+  // Check if we need to create tabs
+  if (!container.querySelector('.tabs')) {
+    const tabs = document.createElement('div');
+    tabs.className = 'tabs';
+    
+    ['openai', 'grok', 'gemini'].forEach(p => {
+      const tab = document.createElement('div');
+      tab.className = `tab ${p}`;
+      tab.textContent = p === 'openai' ? 'ChatGPT' : p.charAt(0).toUpperCase() + p.slice(1);
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs and results
+        container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        container.querySelectorAll('.result').forEach(r => r.classList.remove('active'));
+        
+        // Add active class to clicked tab and corresponding result
+        tab.classList.add('active');
+        container.querySelector(`.result.provider-${p}`)?.classList.add('active');
+      });
+      tabs.appendChild(tab);
+    });
+    
+    container.insertBefore(tabs, container.firstChild);
+  }
+
   const div = document.createElement('div');
   div.className = `result provider-${provider}`;
+
+  // Make this result active if it's the first one
+  if (!container.querySelector('.result')) {
+    div.classList.add('active');
+    container.querySelector(`.tab.${provider}`)?.classList.add('active');
+  }
 
   const frag = document.createDocumentFragment();
 

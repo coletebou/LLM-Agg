@@ -238,3 +238,65 @@ button {
 .provider-gemini .provider-name {
   color: #6366f1;
 }
+
+/* Mobile-specific styles and tab interface */
+.tabs {
+  display: none; /* Hidden by default on desktop */
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+}
+
+.tab.active {
+  background: white;
+  border-bottom: none;
+  font-weight: bold;
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .tabs {
+    display: flex;
+    justify-content: stretch;
+    gap: 0;
+  }
+
+  .results-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .result {
+    display: none; /* Hide all results by default */
+    width: 100%;
+    margin: 0;
+    border-radius: 0 0 4px 4px;
+  }
+
+  .result.active {
+    display: block; /* Show only active result */
+  }
+
+  .tab.openai { color: #10a37f; }
+  .tab.grok { color: #d97706; }
+  .tab.gemini { color: #6366f1; }
+  
+  .tab.active.openai { background: #e6f7f3; }
+  .tab.active.grok { background: #fef3c7; }
+  .tab.active.gemini { background: #ede9fe; }
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  .result {
+    display: block !important; /* Always show all results on desktop */
+  }
+}
