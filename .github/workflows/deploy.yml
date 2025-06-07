@@ -35,5 +35,5 @@ jobs:
           # The correct, absolute path to your deployment folder on Bluehost
           remote_path: '/home3/cpwwhamy/public_html/llm/'
           
-          # This is a good setting to explicitly use SFTP
+          # This is a good setting to explicitly use SFTP.
           sftp_only: true
