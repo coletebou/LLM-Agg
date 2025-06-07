@@ -4,7 +4,7 @@ secrets.js
 Local settings - if you decide to have a local-only version
 If settings.json is just a template, you might not need to ignore it.
 However, if you ever put real keys in a local settings.json, uncomment below.
-settings.json
+
 IDE and editor specific files
 .vscode/
 *.code-workspace
