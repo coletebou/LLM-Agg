@@ -442,7 +442,7 @@ async function askAll(question) {
   const cancelBtn = document.getElementById('cancel-loading');
   currentAbortController = new AbortController();
   const signal = currentAbortController.signal;
-  const tasks = []; // Declare tasks array at the top
+  const tasks = [];
   
   // Create question group and results row
   const group = document.createElement('div');
@@ -491,6 +491,7 @@ async function askAll(question) {
   const thread = threads.find((t) => t.id === currentThreadId);
   if (!thread) return;
 
+  // Add the new user message to each model's conversation history
   thread.openaiMessages.push({ role: 'user', content: question });
   thread.grokMessages.push({ role: 'user', content: question });
   thread.geminiMessages.push({ role: 'user', content: question });
@@ -503,6 +504,8 @@ async function askAll(question) {
     const cached = await getCachedResponse('openai', currentOpenAIMessages);
     if (cached && !canceled) {
       showResult(resultsRow, 'ChatGPT', cached, settings?.openai_model || 'gpt-3.5-turbo', 'openai');
+      // Store the cached response in conversation history
+      thread.openaiMessages.push({ role: 'assistant', content: cached.text });
       updateLoading();
     } else {
       tasks.push(
@@ -511,6 +514,8 @@ async function askAll(question) {
             setCachedResponse('openai', currentOpenAIMessages, result);
             const model = settings?.openai_model || 'gpt-3.5-turbo';
             showResult(resultsRow, 'ChatGPT', result, model, 'openai');
+            // Store the response in conversation history
+            thread.openaiMessages.push({ role: 'assistant', content: result.text });
           }
           updateLoading();
         })
@@ -522,6 +527,8 @@ async function askAll(question) {
     const cached = await getCachedResponse('grok', currentGrokMessages);
     if (cached && !canceled) {
       showResult(resultsRow, 'Grok', cached, settings?.grok_model || 'grok-1', 'grok');
+      // Store the cached response in conversation history
+      thread.grokMessages.push({ role: 'assistant', content: cached.text });
       updateLoading();
     } else {
       tasks.push(
@@ -530,6 +537,8 @@ async function askAll(question) {
             setCachedResponse('grok', currentGrokMessages, result);
             const model = settings?.grok_model || 'grok-1';
             showResult(resultsRow, 'Grok', result, model, 'grok');
+            // Store the response in conversation history
+            thread.grokMessages.push({ role: 'assistant', content: result.text });
           }
           updateLoading();
         })
@@ -541,6 +550,8 @@ async function askAll(question) {
     const cached = await getCachedResponse('gemini', currentGeminiMessages);
     if (cached && !canceled) {
       showResult(resultsRow, 'Gemini', cached, settings?.gemini_model || 'gemini-pro', 'gemini');
+      // Store the cached response in conversation history
+      thread.geminiMessages.push({ role: 'assistant', content: cached.text });
       updateLoading();
     } else {
       tasks.push(
@@ -549,6 +560,8 @@ async function askAll(question) {
             setCachedResponse('gemini', currentGeminiMessages, result);
             const model = settings?.gemini_model || 'gemini-pro';
             showResult(resultsRow, 'Gemini', result, model, 'gemini');
+            // Store the response in conversation history
+            thread.geminiMessages.push({ role: 'assistant', content: result.text });
           }
           updateLoading();
         })
