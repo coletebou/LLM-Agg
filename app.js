@@ -425,16 +425,33 @@ async function askAll(question) {
   const cancelBtn = document.getElementById('cancel-loading');
   currentAbortController = new AbortController();
   const signal = currentAbortController.signal;
+  
+  // Create question group and results row
+  const group = document.createElement('div');
+  group.className = 'question-group';
+  resultsEl.prepend(group);
+
+  const qDiv = document.createElement('div');
+  qDiv.className = 'user-question';
+  qDiv.textContent = question;
+  group.appendChild(qDiv);
+
+  // Create row for results
+  const resultsRow = document.createElement('div');
+  resultsRow.className = 'results-row';
+  group.appendChild(resultsRow);
+
   let canceled = false;
   if (cancelBtn) {
-    cancelBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline';
     cancelBtn.onclick = () => {
-      if (!signal.aborted) currentAbortController.abort();
       canceled = true;
+      currentAbortController.abort();
       loadingEl.style.display = 'none';
       cancelBtn.style.display = 'none';
     };
   }
+
   const activeProviders = ['openai', 'grok', 'gemini'].filter(
     (p) => providerToggles[p]
   );
@@ -442,118 +459,117 @@ async function askAll(question) {
   let completed = 0;
   loadingEl.style.display = 'flex';
   textEl.textContent = `Loading: ${completed} of ${total}`;
+  
   const updateLoading = () => {
-    if (canceled) return;
     completed++;
     textEl.textContent = `Loading: ${completed} of ${total}`;
+    if (completed === total) {
+      loadingEl.style.display = 'none';
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    }
   };
 
   ensureThread(question);
   const thread = threads.find((t) => t.id === currentThreadId);
-  if (!thread) { 
-      console.error("Current thread not found after ensureThread");
-      loadingEl.style.display = 'none';
-      return;
-  }
+  if (!thread) return;
+
   thread.openaiMessages.push({ role: 'user', content: question });
   thread.grokMessages.push({ role: 'user', content: question });
   thread.geminiMessages.push({ role: 'user', content: question });
-  const group = document.createElement('div');
-  group.className = 'question-group';
-  resultsEl.prepend(group); 
 
-  const qDiv = document.createElement('div');
-  qDiv.className = 'user-question';
-  qDiv.textContent = question;
-  group.appendChild(qDiv);
-
-  const tasks = [];
-  const currentOpenAIMessages = [...thread.openaiMessages]; 
+  const currentOpenAIMessages = [...thread.openaiMessages];
   const currentGrokMessages = [...thread.grokMessages];
   const currentGeminiMessages = [...thread.geminiMessages];
 
+  const results = [];
+
   if (providerToggles.openai) {
-    tasks.push(
-      getCachedResponse('openai', currentOpenAIMessages).then(async (cached) => {
-        let res;
-        if (cached) {
-          res = cached;
-        } else {
-          res = await askChatGPT(currentOpenAIMessages, signal);
-        }
-        if (!res?.canceled) {
-          await showResult(group, 'ChatGPT', res, settings?.openai_model || 'gpt-3.5-turbo', 'openai');
-          if (!cached && !res.text.includes("proxy error")) {
-            setCachedResponse('openai', currentOpenAIMessages, res);
+    const cached = await getCachedResponse('openai', currentOpenAIMessages);
+    if (cached && !canceled) {
+      results.push({ provider: 'openai', result: cached, messages: currentOpenAIMessages });
+    } else {
+      const task = askChatGPT(currentOpenAIMessages, signal)
+        .then((result) => {
+          if (!result.canceled && !canceled) {
+            setCachedResponse('openai', currentOpenAIMessages, result);
+            results.push({ provider: 'openai', result, messages: currentOpenAIMessages });
+            const model = settings?.openai_model || 'gpt-3.5-turbo';
+            showResult(resultsRow, 'ChatGPT', result, model, 'openai');
           }
-          thread.openaiMessages.push({ role: 'assistant', content: res.text });
-        }
-        updateLoading();
-        return res;
-      })
-    );
+          updateLoading();
+        })
+        .catch((err) => {
+          console.error('OpenAI error:', err);
+          if (!canceled) {
+            showResult(resultsRow, 'ChatGPT', { text: err.toString() }, 'Unknown', 'openai');
+          }
+          updateLoading();
+        });
+      tasks.push(task);
+    }
   }
+
   if (providerToggles.grok) {
-    tasks.push(
-      getCachedResponse('grok', currentGrokMessages).then(async (cached) => {
-        let res;
-        if (cached) {
-          res = cached;
-        } else {
-          res = await askGrok(currentGrokMessages, signal);
-        }
-        if (!res?.canceled) {
-          await showResult(group, 'Grok', res, settings?.grok_model || 'grok-1', 'grok');
-          if (!cached && !res.text.includes("proxy error")) {
-             setCachedResponse('grok', currentGrokMessages, res);
+    const cached = await getCachedResponse('grok', currentGrokMessages);
+    if (cached && !canceled) {
+      results.push({ provider: 'grok', result: cached, messages: currentGrokMessages });
+    } else {
+      const task = askGrok(currentGrokMessages, signal)
+        .then((result) => {
+          if (!result.canceled && !canceled) {
+            setCachedResponse('grok', currentGrokMessages, result);
+            results.push({ provider: 'grok', result, messages: currentGrokMessages });
+            const model = settings?.grok_model || 'grok-1';
+            showResult(resultsRow, 'Grok', result, model, 'grok');
           }
-          thread.grokMessages.push({ role: 'assistant', content: res.text });
-        }
-        updateLoading();
-        return res;
-      })
-    );
+          updateLoading();
+        })
+        .catch((err) => {
+          console.error('Grok error:', err);
+          if (!canceled) {
+            showResult(resultsRow, 'Grok', { text: err.toString() }, 'Unknown', 'grok');
+          }
+          updateLoading();
+        });
+      tasks.push(task);
+    }
   }
+
   if (providerToggles.gemini) {
-    tasks.push(
-      getCachedResponse('gemini', currentGeminiMessages).then(async (cached) => {
-        let res;
-        if (cached) {
-          res = cached;
-        } else {
-          res = await askGemini(currentGeminiMessages, signal);
-        }
-        if (!res?.canceled) {
-          await showResult(group, 'Gemini', res, settings?.gemini_model || 'gemini-pro', 'gemini');
-          if (!cached && !res.text.includes("proxy error")) {
-            setCachedResponse('gemini', currentGeminiMessages, res);
+    const cached = await getCachedResponse('gemini', currentGeminiMessages);
+    if (cached && !canceled) {
+      results.push({ provider: 'gemini', result: cached, messages: currentGeminiMessages });
+    } else {
+      const task = askGemini(currentGeminiMessages, signal)
+        .then((result) => {
+          if (!result.canceled && !canceled) {
+            setCachedResponse('gemini', currentGeminiMessages, result);
+            results.push({ provider: 'gemini', result, messages: currentGeminiMessages });
+            const model = settings?.gemini_model || 'gemini-pro';
+            showResult(resultsRow, 'Gemini', result, model, 'gemini');
           }
-          thread.geminiMessages.push({ role: 'assistant', content: res.text });
-        }
-        updateLoading();
-        return res;
-      })
-    );
+          updateLoading();
+        })
+        .catch((err) => {
+          console.error('Gemini error:', err);
+          if (!canceled) {
+            showResult(resultsRow, 'Gemini', { text: err.toString() }, 'Unknown', 'gemini');
+          }
+          updateLoading();
+        });
+      tasks.push(task);
+    }
   }
 
   if (tasks.length === 0) {
     loadingEl.style.display = 'none';
-    updatePopupWidth();
+    if (cancelBtn) cancelBtn.style.display = 'none';
     return;
   }
 
   Promise.allSettled(tasks).then(() => {
-    loadingEl.style.display = 'none';
-    if (cancelBtn) cancelBtn.style.display = 'none';
-    if (!canceled) {
-      const finalThread = threads.find((t) => t.id === currentThreadId);
-      if (finalThread) {
-        finalThread.html = resultsEl.innerHTML;
-        saveHistory();
-        renderHistory();
-      }
-    }
-    updatePopupWidth();
+    if (canceled) return;
+    saveHistory();
   });
 }
 

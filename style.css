@@ -171,6 +171,8 @@ button {
   margin-top: 10px;
   width: 100%;           /* Ensure full width of container */
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .user-question {
@@ -178,6 +180,15 @@ button {
   margin-bottom: 5px;
   word-wrap: break-word; /* Allow long questions to wrap */
   word-break: break-all; /* More aggressive wrapping for questions */
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.results-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: space-between;
 }
 
 /* Nicer scrollbars for preformatted text blocks within results */
