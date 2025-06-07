@@ -204,8 +204,18 @@ async function showLastPRDate() {
 
 function renderHistory() {
   const container = document.getElementById('history');
-  if (!container) return;
-  container.innerHTML = '';
+  const historyItems = container?.querySelector('.history-items');
+  const clearBtn = document.getElementById('clear-history');
+  
+  if (!container || !historyItems) return;
+  
+  historyItems.innerHTML = '';
+  
+  // Show clear history button if there are threads
+  if (clearBtn) {
+    clearBtn.style.display = threads.length > 0 ? 'block' : 'none';
+  }
+  
   threads.forEach((t) => {
     const div = document.createElement('div');
     div.className = 'history-item';

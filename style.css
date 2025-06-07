@@ -83,6 +83,22 @@ button {
   padding-bottom: 40px; /* Space for clear history button */
 }
 
+/* Style the clear history button */
+#clear-history {
+  margin-top: 20px;
+  width: 100%;
+  padding: 8px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#clear-history:hover {
+  background-color: #d32f2f;
+}
+
 #loading {
   margin-top: 5px;
   display: flex;
@@ -344,8 +360,16 @@ button {
 }
 
 #clear-history {
-  position: relative;
   margin-top: 20px;
   width: 100%;
-  display: block;
+  padding: 8px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#clear-history:hover {
+  background-color: #d32f2f;
 }
