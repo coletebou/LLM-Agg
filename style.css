@@ -1,7 +1,6 @@
 /* Prevent stray horizontal scrollbars on the root element */
 html {
   box-sizing: border-box;
-  overflow-x: hidden;
   margin: 0;
   padding: 0;
 }
@@ -11,13 +10,10 @@ html {
 
 body {
   font-family: Arial, sans-serif;
-  padding: 20px;          /* Increased padding around borders */
-  min-width: 300px;
-  max-width: 800px;
-  overflow-y: auto;
-  overflow-x: hidden;     /* Main guard against horizontal scrollbars */
-  margin: 0;
-  width: 100%;            /* Ensure body does not exceed viewport width */
+  padding: 20px;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Hide scrollbar in Firefox */
@@ -109,15 +105,45 @@ button {
   to { transform: rotate(360deg); }
 }
 
+/* Ensure the results container never overflows horizontally */
+#results {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.question-group {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.user-question {
+  font-weight: bold;
+  margin-bottom: 20px;
+  word-wrap: break-word;
+  width: 100%;
+}
+
+.results-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
 /* Styles for each result block */
 .result {
-  margin-top: 10px;
-  padding: 10px;        /* Increased padding inside each result block */
+  flex: 1;
+  margin-top: 0;
+  padding: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 100%;
-  overflow: hidden;     /* Robust container to hide overflow */
-  overflow-wrap: anywhere; /* Break long words to avoid overflow */
+  min-width: 0; /* Allow flex items to shrink below their minimum content size */
+  width: calc(33.333% - 14px); /* Each result takes up exactly one-third of the space minus gaps */
+  overflow-wrap: break-word;
+  height: fit-content;
 }
 
 /* New class to handle long summary lines */
@@ -145,13 +171,6 @@ button {
   font-size: 12px;       /* Slightly smaller text to fit more code */
 }
 
-/* Ensure the results container never overflows horizontally */
-#results {
-  width: 100%;
-  overflow-x: hidden;
-  overflow-wrap: anywhere;
-}
-
 /* Ensure history items wrap within their container to prevent overflow */
 .history-item {
   margin-top: 5px;
@@ -165,48 +184,6 @@ button {
 
 .history-item button {
   float: right;
-}
-
-.question-group {
-  margin-top: 10px;
-  width: 100%;           /* Ensure full width of container */
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.user-question {
-  font-weight: bold;
-  margin-bottom: 5px;
-  word-wrap: break-word; /* Allow long questions to wrap */
-  word-break: break-all; /* More aggressive wrapping for questions */
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-.results-row {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  justify-content: space-between;
-}
-
-/* Nicer scrollbars for preformatted text blocks within results */
-.result pre::-webkit-scrollbar {
-  height: 8px;
-}
-
-.result pre::-webkit-scrollbar-track {
-  background: #e0e0e0;
-}
-
-.result pre::-webkit-scrollbar-thumb {
-  background: #adadad;
-  border-radius: 4px;
-}
-
-.result pre::-webkit-scrollbar-thumb:hover {
-  background: #838383;
 }
 
 #last-pr-date {

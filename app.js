@@ -425,6 +425,7 @@ async function askAll(question) {
   const cancelBtn = document.getElementById('cancel-loading');
   currentAbortController = new AbortController();
   const signal = currentAbortController.signal;
+  const tasks = []; // Declare tasks array at the top
   
   // Create question group and results row
   const group = document.createElement('div');
@@ -481,83 +482,60 @@ async function askAll(question) {
   const currentGrokMessages = [...thread.grokMessages];
   const currentGeminiMessages = [...thread.geminiMessages];
 
-  const results = [];
-
   if (providerToggles.openai) {
     const cached = await getCachedResponse('openai', currentOpenAIMessages);
     if (cached && !canceled) {
-      results.push({ provider: 'openai', result: cached, messages: currentOpenAIMessages });
+      showResult(resultsRow, 'ChatGPT', cached, settings?.openai_model || 'gpt-3.5-turbo', 'openai');
+      updateLoading();
     } else {
-      const task = askChatGPT(currentOpenAIMessages, signal)
-        .then((result) => {
+      tasks.push(
+        askChatGPT(currentOpenAIMessages, signal).then((result) => {
           if (!result.canceled && !canceled) {
             setCachedResponse('openai', currentOpenAIMessages, result);
-            results.push({ provider: 'openai', result, messages: currentOpenAIMessages });
             const model = settings?.openai_model || 'gpt-3.5-turbo';
             showResult(resultsRow, 'ChatGPT', result, model, 'openai');
           }
           updateLoading();
         })
-        .catch((err) => {
-          console.error('OpenAI error:', err);
-          if (!canceled) {
-            showResult(resultsRow, 'ChatGPT', { text: err.toString() }, 'Unknown', 'openai');
-          }
-          updateLoading();
-        });
-      tasks.push(task);
+      );
     }
   }
 
   if (providerToggles.grok) {
     const cached = await getCachedResponse('grok', currentGrokMessages);
     if (cached && !canceled) {
-      results.push({ provider: 'grok', result: cached, messages: currentGrokMessages });
+      showResult(resultsRow, 'Grok', cached, settings?.grok_model || 'grok-1', 'grok');
+      updateLoading();
     } else {
-      const task = askGrok(currentGrokMessages, signal)
-        .then((result) => {
+      tasks.push(
+        askGrok(currentGrokMessages, signal).then((result) => {
           if (!result.canceled && !canceled) {
             setCachedResponse('grok', currentGrokMessages, result);
-            results.push({ provider: 'grok', result, messages: currentGrokMessages });
             const model = settings?.grok_model || 'grok-1';
             showResult(resultsRow, 'Grok', result, model, 'grok');
           }
           updateLoading();
         })
-        .catch((err) => {
-          console.error('Grok error:', err);
-          if (!canceled) {
-            showResult(resultsRow, 'Grok', { text: err.toString() }, 'Unknown', 'grok');
-          }
-          updateLoading();
-        });
-      tasks.push(task);
+      );
     }
   }
 
   if (providerToggles.gemini) {
     const cached = await getCachedResponse('gemini', currentGeminiMessages);
     if (cached && !canceled) {
-      results.push({ provider: 'gemini', result: cached, messages: currentGeminiMessages });
+      showResult(resultsRow, 'Gemini', cached, settings?.gemini_model || 'gemini-pro', 'gemini');
+      updateLoading();
     } else {
-      const task = askGemini(currentGeminiMessages, signal)
-        .then((result) => {
+      tasks.push(
+        askGemini(currentGeminiMessages, signal).then((result) => {
           if (!result.canceled && !canceled) {
             setCachedResponse('gemini', currentGeminiMessages, result);
-            results.push({ provider: 'gemini', result, messages: currentGeminiMessages });
             const model = settings?.gemini_model || 'gemini-pro';
             showResult(resultsRow, 'Gemini', result, model, 'gemini');
           }
           updateLoading();
         })
-        .catch((err) => {
-          console.error('Gemini error:', err);
-          if (!canceled) {
-            showResult(resultsRow, 'Gemini', { text: err.toString() }, 'Unknown', 'gemini');
-          }
-          updateLoading();
-        });
-      tasks.push(task);
+      );
     }
   }
 
@@ -567,9 +545,13 @@ async function askAll(question) {
     return;
   }
 
-  Promise.allSettled(tasks).then(() => {
-    if (canceled) return;
-    saveHistory();
+  Promise.all(tasks.map(p => p.catch(err => console.error(err)))).then(() => {
+    if (!canceled) {
+      thread.html = resultsEl.innerHTML;
+      saveHistory();
+    }
+    loadingEl.style.display = 'none';
+    if (cancelBtn) cancelBtn.style.display = 'none';
   });
 }
 
