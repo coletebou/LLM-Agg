@@ -1,5 +1,5 @@
 # Name of your workflow
-name: Deploy to Bluehost Subdomain
+name: Deploy to Bluehost via SFTP
 
 # Run this workflow every time you push to the 'main' branch
 on:
@@ -8,8 +8,7 @@ on:
       - main
 
 jobs:
-  # The job ID
-  ftp-deploy:
+  deploy:
     # The runner (virtual machine) to run the job on
     runs-on: ubuntu-latest
     
@@ -18,19 +17,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. The main deploy step using a popular FTP/SFTP action
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      # 2. This is the new, correct SFTP deployment step
+      - name: SFTP Deploy to Bluehost
+        # Use the appleboy/sftp-action, which fully supports SFTP
+        uses: appleboy/sftp-action@v1.0.3
         with:
-          protocol: sftp  # Use 'ftp' for an insecure connection, but 'sftp' is recommended for security
-          port: 22  # Default port for SFTP; use 21 for FTP
-          # Use 'sftp' for a secure connection
-          server: ${{ secrets.FTP_SERVER }}
+          # Your server's IP address from GitHub Secrets
+          host: ${{ secrets.FTP_SERVER }}
+          
+          # Your cPanel username from GitHub Secrets
           username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
           
-          # The destination folder on your server (the subdomain's document root)
-          server-dir: /public_html/llm/
+          # Use the SSH Private Key for secure authentication
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           
-          # Don't delete existing files that aren't in the repo (like .htaccess if needed)
-          dangerous-clean-slate: false
+          # The passphrase for your SSH key, if you have one
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          
+          # The SFTP port is always the SSH port
+          port: 22
+          
+          # The source directory from your repo to upload (./ is everything)
+          source: "./"
+          
+          # The destination directory on your Bluehost server
+          target: /public_html/llm/
