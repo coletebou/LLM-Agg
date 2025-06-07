@@ -22,6 +22,8 @@ jobs:
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
+          protocol: sftp  # Use 'ftp' for an insecure connection, but 'sftp' is recommended for security
+          port: 22  # Default port for SFTP; use 21 for FTP
           # Use 'sftp' for a secure connection
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
