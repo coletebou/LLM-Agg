@@ -20,7 +20,7 @@ jobs:
       # 2. This is the new, correct SFTP deployment step
       - name: SFTP Deploy to Bluehost
         # Use the appleboy/sftp-action, which fully supports SFTP
-        uses: appleboy/sftp-action@v1.0.3
+        uses: appleboy/sftp-action@master
         with:
           # Your server's IP address from GitHub Secrets
           host: ${{ secrets.FTP_SERVER }}
