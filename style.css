@@ -11,9 +11,9 @@ html {
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
-  margin: 0 auto;
+  margin: 0;
   width: 100%;
-  max-width: 100%;
+  max-width: 100vw;
 }
 
 /* Hide scrollbar in Firefox */
@@ -111,6 +111,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 100vw;
 }
 
 .question-group {
@@ -130,7 +131,7 @@ button {
   gap: 20px;
   width: 100%;
   flex-wrap: nowrap;
-  justify-content: space-between;
+  justify-content: stretch;
 }
 
 /* Styles for each result block */
@@ -140,10 +141,25 @@ button {
   padding: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  min-width: 0; /* Allow flex items to shrink below their minimum content size */
-  width: calc(33.333% - 14px); /* Each result takes up exactly one-third of the space minus gaps */
+  min-width: 0;
   overflow-wrap: break-word;
-  height: fit-content;
+  width: 100%;
+}
+
+/* Make sure content inside results doesn't overflow */
+.result > * {
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+/* Ensure code blocks are readable but don't overflow */
+.result pre {
+  background-color: #f4f4f4;
+  padding: 10px;
+  overflow-x: auto; /* Allow horizontal scroll for code blocks */
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
 }
 
 /* New class to handle long summary lines */

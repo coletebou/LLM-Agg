@@ -22,24 +22,11 @@ let currentAbortController = null;
 
 // Function to update the popup width dynamically
 function updatePopupWidth() {
-  const cssMaxWidth = 800;
-  const cssMinWidth = 300;
-
   requestAnimationFrame(() => {
-    // Temporarily let the body expand to its natural width for measurement
-    const originalWidth = document.body.style.width;
-    document.body.style.width = 'max-content';
-
-    const scrollWidth = document.body.scrollWidth;
-
-    document.body.style.width = originalWidth;
-
-    let newWidth = Math.ceil(scrollWidth);
-    newWidth = Math.min(newWidth, cssMaxWidth);
-    newWidth = Math.max(newWidth, cssMinWidth);
-
-    document.documentElement.style.width = newWidth + 'px';
-    document.body.style.width = newWidth + 'px';
+    // Remove fixed width constraints
+    document.documentElement.style.width = '100vw';
+    document.body.style.width = '100%';
+    document.body.style.maxWidth = '100vw';
   });
 }
 
