@@ -1,7 +1,5 @@
-# Name of your workflow
 name: Deploy to Bluehost via SFTP
 
-# Run this workflow every time you push to the 'main' branch
 on:
   push:
     branches:
@@ -9,36 +7,25 @@ on:
 
 jobs:
   deploy:
-    # The runner (virtual machine) to run the job on
     runs-on: ubuntu-latest
-    
     steps:
-      # 1. Check out your repository code so the job can access it
+      # 1. Checks out your repository's code so the workflow can access it.
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. This is the new, correct SFTP deployment step
-      - name: SFTP Deploy to Bluehost
-        # Use the appleboy/sftp-action, which fully supports SFTP
-        uses: appleboy/sftp-action@master
+      # 2. This step uses the correct, dedicated SFTP action.
+      - name: SFTP Deploy
+        # This is a popular and well-maintained SFTP-specific action.
+        uses: easingthemes/sftp-deploy@v3.2.0
         with:
-          # Your server's IP address from GitHub Secrets
-          host: ${{ secrets.FTP_SERVER }}
+          # Your SSH private key, stored as a repository secret.
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           
-          # Your cPanel username from GitHub Secrets
-          username: ${{ secrets.FTP_USERNAME }}
+          # Your server's IP address (maps to your FTP_SERVER secret).
+          REMOTE_HOST: ${{ secrets.FTP_SERVER }}
           
-          # Use the SSH Private Key for secure authentication
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Your cPanel username (maps to your FTP_USERNAME secret).
+          REMOTE_USER: ${{ secrets.FTP_USERNAME }}
           
-          # The passphrase for your SSH key, if you have one
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          
-          # The SFTP port is always the SSH port
-          port: 22
-          
-          # The source directory from your repo to upload (./ is everything)
-          source: "./"
-          
-          # The destination directory on your Bluehost server
-          target: /public_html/llm/
+          # The destination directory on your Bluehost server.
+          TARGET: /home3/cpwwhamy/public_html/llm/
